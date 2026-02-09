@@ -8,8 +8,8 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Pool } from "pg";
 import { sql } from "drizzle-orm";
-import { AppConfigService } from "src/config/app/app-config.service";
-import { DatabaseMetricsFacade } from "src/config/observability/database-metrics.facade";
+import { AppConfigService } from "../../app/app-config.service";
+import { DatabaseMetricsFacade } from "../../observability/database-metrics.facade";
 import { DrizzleDb } from "./postgres.types";
 
 @Injectable()

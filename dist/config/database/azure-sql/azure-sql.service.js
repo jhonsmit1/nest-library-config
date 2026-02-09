@@ -13,8 +13,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AzureSqlService = void 0;
 const common_1 = require("@nestjs/common");
 const knex_1 = require("knex");
-const app_config_service_1 = require("src/config/app/app-config.service");
-const database_metrics_facade_1 = require("src/config/observability/database-metrics.facade");
+const app_config_service_1 = require("../../app/app-config.service");
+const database_metrics_facade_1 = require("../../observability/database-metrics.facade");
 let AzureSqlService = AzureSqlService_1 = class AzureSqlService {
     config;
     metrics;

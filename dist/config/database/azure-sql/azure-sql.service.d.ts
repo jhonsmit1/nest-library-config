@@ -1,7 +1,7 @@
 import { OnModuleInit, OnModuleDestroy } from "@nestjs/common";
 import { Knex } from "knex";
-import { AppConfigService } from "src/config/app/app-config.service";
-import { DatabaseMetricsFacade } from "src/config/observability/database-metrics.facade";
+import { AppConfigService } from "../../app/app-config.service";
+import { DatabaseMetricsFacade } from "../../observability/database-metrics.facade";
 export declare class AzureSqlService implements OnModuleInit, OnModuleDestroy {
     private readonly config;
     private readonly metrics;

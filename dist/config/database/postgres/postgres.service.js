@@ -19,8 +19,8 @@ const node_postgres_1 = require("drizzle-orm/node-postgres");
 const migrator_1 = require("drizzle-orm/node-postgres/migrator");
 const pg_1 = require("pg");
 const drizzle_orm_1 = require("drizzle-orm");
-const app_config_service_1 = require("src/config/app/app-config.service");
-const database_metrics_facade_1 = require("src/config/observability/database-metrics.facade");
+const app_config_service_1 = require("../../app/app-config.service");
+const database_metrics_facade_1 = require("../../observability/database-metrics.facade");
 let PostgresService = PostgresService_1 = class PostgresService {
     config;
     metrics;
