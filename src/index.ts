@@ -20,8 +20,3 @@ export * from "./config/database/database.client";
 export * from "./config/database/database.tokens";
 export * from "./config/database/postgres/postgres.types";
 
-// =========================
-// Observability
-// =========================
-export * from "./config/observability/observability.module";
-export * from "./config/observability/database-metrics.facade";

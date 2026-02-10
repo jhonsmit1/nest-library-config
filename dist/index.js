@@ -24,5 +24,3 @@ __exportStar(require("./config/database/database.options"), exports);
 __exportStar(require("./config/database/database.client"), exports);
 __exportStar(require("./config/database/database.tokens"), exports);
 __exportStar(require("./config/database/postgres/postgres.types"), exports);
-__exportStar(require("./config/observability/observability.module"), exports);
-__exportStar(require("./config/observability/database-metrics.facade"), exports);

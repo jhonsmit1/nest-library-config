@@ -8,13 +8,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var AzureSqlService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AzureSqlService = void 0;
 const common_1 = require("@nestjs/common");
 const knex_1 = require("knex");
 const app_config_service_1 = require("../../app/app-config.service");
-const database_metrics_facade_1 = require("../../observability/database-metrics.facade");
+const database_metrics_token_1 = require("../database.metrics.token");
 let AzureSqlService = AzureSqlService_1 = class AzureSqlService {
     config;
     metrics;
@@ -125,6 +128,6 @@ let AzureSqlService = AzureSqlService_1 = class AzureSqlService {
 exports.AzureSqlService = AzureSqlService;
 exports.AzureSqlService = AzureSqlService = AzureSqlService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [app_config_service_1.AppConfigService,
-        database_metrics_facade_1.DatabaseMetricsFacade])
+    __param(1, (0, common_1.Inject)(database_metrics_token_1.DATABASE_METRICS)),
+    __metadata("design:paramtypes", [app_config_service_1.AppConfigService, Object])
 ], AzureSqlService);

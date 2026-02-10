@@ -12,18 +12,24 @@ const common_1 = require("@nestjs/common");
 const postgres_service_1 = require("./postgres/postgres.service");
 const azure_sql_service_1 = require("./azure-sql/azure-sql.service");
 const app_config_service_1 = require("../app/app-config.service");
-const database_metrics_facade_1 = require("../observability/database-metrics.facade");
 const database_tokens_1 = require("./database.tokens");
+const database_metrics_token_1 = require("./database.metrics.token");
+const noop_database_metrics_1 = require("./noop-database-metrics");
 let DatabaseModule = DatabaseModule_1 = class DatabaseModule {
     static forRoot(options) {
-        const providers = [];
+        const providers = [
+            {
+                provide: database_metrics_token_1.DATABASE_METRICS,
+                useClass: noop_database_metrics_1.NoopDatabaseMetrics,
+            },
+        ];
         if (options.postgres) {
             providers.push({
                 provide: postgres_service_1.PostgresService,
                 useFactory: (config, metrics) => {
                     return new postgres_service_1.PostgresService(config, metrics, options.schema);
                 },
-                inject: [app_config_service_1.AppConfigService, database_metrics_facade_1.DatabaseMetricsFacade],
+                inject: [app_config_service_1.AppConfigService, database_metrics_token_1.DATABASE_METRICS],
             }, {
                 provide: database_tokens_1.DATABASE_CLIENT,
                 useExisting: postgres_service_1.PostgresService,

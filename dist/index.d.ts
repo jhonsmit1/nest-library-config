@@ -8,5 +8,3 @@ export * from "./config/database/database.options";
 export * from "./config/database/database.client";
 export * from "./config/database/database.tokens";
 export * from "./config/database/postgres/postgres.types";
-export * from "./config/observability/observability.module";
-export * from "./config/observability/database-metrics.facade";

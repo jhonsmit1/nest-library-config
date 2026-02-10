@@ -3,10 +3,12 @@ import {
     Logger,
     OnModuleInit,
     OnModuleDestroy,
+    Inject,
 } from "@nestjs/common";
 import knex, { Knex } from "knex";
 import { AppConfigService } from "../../app/app-config.service";
-import { DatabaseMetricsFacade } from "../../observability/database-metrics.facade";
+import { DatabaseMetrics } from "../database.metrics";
+import { DATABASE_METRICS } from "../database.metrics.token";
 
 @Injectable()
 export class AzureSqlService implements OnModuleInit, OnModuleDestroy {
@@ -15,7 +17,8 @@ export class AzureSqlService implements OnModuleInit, OnModuleDestroy {
 
     constructor(
         private readonly config: AppConfigService,
-        private readonly metrics: DatabaseMetricsFacade
+        @Inject(DATABASE_METRICS)
+        private readonly metrics: DatabaseMetrics
     ) { }
 
     /* -------------------------------------------------------------------------- */

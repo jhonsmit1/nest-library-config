@@ -20,7 +20,7 @@ const migrator_1 = require("drizzle-orm/node-postgres/migrator");
 const pg_1 = require("pg");
 const drizzle_orm_1 = require("drizzle-orm");
 const app_config_service_1 = require("../../app/app-config.service");
-const database_metrics_facade_1 = require("../../observability/database-metrics.facade");
+const database_metrics_token_1 = require("../database.metrics.token");
 let PostgresService = PostgresService_1 = class PostgresService {
     config;
     metrics;
@@ -110,7 +110,7 @@ let PostgresService = PostgresService_1 = class PostgresService {
         const start = Date.now();
         try {
             const result = await db.transaction(fn);
-            this.metrics?.recordPostgresQuery("transaction", (Date.now() - start) / 1000, this.config.dbName);
+            this.metrics.recordPostgresQuery("transaction", (Date.now() - start) / 1000, this.config.dbName);
             return result;
         }
         catch (error) {
@@ -126,7 +126,7 @@ let PostgresService = PostgresService_1 = class PostgresService {
         try {
             await this.getDb().execute((0, drizzle_orm_1.sql) `SELECT current_database(), now();`);
             const duration = Date.now() - start;
-            this.metrics?.recordPostgresQuery("healthcheck", duration / 1000, this.config.dbName);
+            this.metrics.recordPostgresQuery("healthcheck", duration / 1000, this.config.dbName);
             return { success: true, duration };
         }
         catch (error) {
@@ -140,7 +140,6 @@ let PostgresService = PostgresService_1 = class PostgresService {
 exports.PostgresService = PostgresService;
 exports.PostgresService = PostgresService = PostgresService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __param(1, (0, common_1.Optional)()),
-    __metadata("design:paramtypes", [app_config_service_1.AppConfigService,
-        database_metrics_facade_1.DatabaseMetricsFacade, Object])
+    __param(1, (0, common_1.Inject)(database_metrics_token_1.DATABASE_METRICS)),
+    __metadata("design:paramtypes", [app_config_service_1.AppConfigService, Object, Object])
 ], PostgresService);

@@ -3,8 +3,10 @@ import { DatabaseModuleOptions } from "./database.options";
 import { PostgresService } from "./postgres/postgres.service";
 import { AzureSqlService } from "./azure-sql/azure-sql.service";
 import { AppConfigService } from "../app/app-config.service";
-import { DatabaseMetricsFacade } from "../observability/database-metrics.facade";
 import { DATABASE_CLIENT } from "./database.tokens";
+import { DATABASE_METRICS } from "./database.metrics.token";
+import { NoopDatabaseMetrics } from "./noop-database-metrics";
+import { DatabaseMetrics } from "./database.metrics";
 
 @Global()
 @Module({})
@@ -12,7 +14,13 @@ export class DatabaseModule {
     static forRoot<TSchema extends Record<string, unknown>>(
         options: DatabaseModuleOptions & { schema?: TSchema }
     ): DynamicModule {
-        const providers: Provider[] = [];
+
+        const providers: Provider[] = [
+            {
+                provide: DATABASE_METRICS,
+                useClass: NoopDatabaseMetrics,
+            },
+        ];
 
         if (options.postgres) {
             providers.push(
@@ -20,11 +28,15 @@ export class DatabaseModule {
                     provide: PostgresService,
                     useFactory: (
                         config: AppConfigService,
-                        metrics?: DatabaseMetricsFacade
+                        metrics: DatabaseMetrics
                     ) => {
-                        return new PostgresService(config, metrics, options.schema);
+                        return new PostgresService(
+                            config,
+                            metrics,
+                            options.schema
+                        );
                     },
-                    inject: [AppConfigService, DatabaseMetricsFacade],
+                    inject: [AppConfigService, DATABASE_METRICS],
                 },
                 {
                     provide: DATABASE_CLIENT,
