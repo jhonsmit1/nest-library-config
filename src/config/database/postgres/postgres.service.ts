@@ -2,7 +2,8 @@ import {
     Injectable,
     Logger,
     OnModuleDestroy,
-    Optional
+    OnModuleInit,
+    Optional,
 } from "@nestjs/common";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
@@ -13,7 +14,7 @@ import { DatabaseMetricsFacade } from "../../observability/database-metrics.faca
 import { DrizzleDb } from "./postgres.types";
 
 @Injectable()
-export class PostgresService implements OnModuleDestroy {
+export class PostgresService implements OnModuleInit, OnModuleDestroy {
     private readonly logger = new Logger(PostgresService.name);
 
     private pool: Pool | null = null;
@@ -22,64 +23,96 @@ export class PostgresService implements OnModuleDestroy {
     constructor(
         private readonly config: AppConfigService,
         @Optional()
-        private readonly metrics?: DatabaseMetricsFacade
+        private readonly metrics?: DatabaseMetricsFacade,
+        /**
+         * El schema es CONFIGURACION del modulo,
+         * no algo que se pase dinamicamente en runtime
+         */
+        private readonly schema?: Record<string, unknown>
     ) { }
+
+    /* -------------------------------------------------------------------------- */
+    /*                               Lifecycle                                    */
+    /* -------------------------------------------------------------------------- */
+
+    async onModuleInit(): Promise<void> {
+        await this.connect();
+    }
+
+    async onModuleDestroy(): Promise<void> {
+        await this.disconnect();
+    }
 
     /* -------------------------------------------------------------------------- */
     /*                               Connection                                   */
     /* -------------------------------------------------------------------------- */
 
-    async connect<TSchema extends Record<string, unknown>>(
-        schema?: TSchema
-    ): Promise<void> {
+    private async connect(): Promise<void> {
         if (this.db) {
-            this.logger.warn("Postgres already connected. connect() ignored.");
+            this.logger.warn("Postgres already connected. Skipping connect().");
             return;
         }
 
         const isTest = this.config.env === "test";
 
-        this.pool = new Pool({
-            user: isTest ? this.config.testDbUser : this.config.dbUser,
-            host: isTest ? this.config.testDbHost : this.config.dbHost,
-            database: isTest ? this.config.testDbName : this.config.dbName,
-            password: isTest ? this.config.testDbPassword : this.config.dbPassword,
-            port: Number(isTest ? this.config.testDbPort : this.config.dbPort),
-            ssl: this.config.useSSL === "true" ? { rejectUnauthorized: false } : undefined,
-            max: this.config.dbMaxConnections,
-        });
+        try {
+            this.pool = new Pool({
+                user: isTest ? this.config.testDbUser : this.config.dbUser,
+                host: isTest ? this.config.testDbHost : this.config.dbHost,
+                database: isTest ? this.config.testDbName : this.config.dbName,
+                password: isTest
+                    ? this.config.testDbPassword
+                    : this.config.dbPassword,
+                port: Number(isTest ? this.config.testDbPort : this.config.dbPort),
+                ssl:
+                    this.config.useSSL === "true"
+                        ? { rejectUnauthorized: false }
+                        : undefined,
+                max: this.config.dbMaxConnections,
+            });
 
-        this.pool.on("connect", () => {
-            this.logger.debug("Postgres pool: client connected");
-        });
+            this.pool.on("connect", () => {
+                this.logger.debug("Postgres pool: client connected");
+            });
 
-        this.pool.on("error", (error) => {
-            this.logger.error("Postgres pool error", error);
-        });
+            this.pool.on("error", (error) => {
+                this.logger.error("Postgres pool error", error);
+            });
 
-        this.db = drizzle(this.pool, { schema });
+            this.db = drizzle(this.pool, {
+                schema: this.schema,
+            });
 
-        // esto se debe validar si se debe quitar
-        if (this.config.runMigrations && this.config.env !== "production") {
-            await migrate(this.db, { migrationsFolder: "drizzle" });
-            this.logger.log("Postgres migrations executed");
+            /**
+             * Migrations: solo si explícitamente se permite
+             * y nunca en producción
+             */
+            if (this.config.runMigrations && this.config.env !== "production") {
+                await migrate(this.db, { migrationsFolder: "drizzle" });
+                this.logger.log("Postgres migrations executed");
+            }
+
+            this.logger.log("PostgreSQL connected successfully");
+        } catch (error) {
+            this.logger.error("Failed to connect to PostgreSQL", error);
+            this.pool = null;
+            this.db = null;
+            throw error; // fail fast
         }
-
-        this.logger.log("PostgreSQL connected");
     }
 
-    async disconnect(): Promise<void> {
+    private async disconnect(): Promise<void> {
         if (!this.pool) return;
 
-        await this.pool.end();
-        this.pool = null;
-        this.db = null;
-
-        this.logger.log("PostgreSQL disconnected");
-    }
-
-    async onModuleDestroy() {
-        await this.disconnect();
+        try {
+            await this.pool.end();
+            this.logger.log("PostgreSQL disconnected");
+        } catch (error) {
+            this.logger.error("Error disconnecting PostgreSQL", error);
+        } finally {
+            this.pool = null;
+            this.db = null;
+        }
     }
 
     /* -------------------------------------------------------------------------- */
@@ -98,12 +131,16 @@ export class PostgresService implements OnModuleDestroy {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                               Transactions                                  */
+    /*                               Transactions                                 */
     /* -------------------------------------------------------------------------- */
 
-    async withTransaction<T, TSchema extends Record<string, unknown> = Record<string, unknown>>(fn: (tx: DrizzleDb<TSchema>) => Promise<T>): Promise<T> {
+    async withTransaction<
+        T,
+        TSchema extends Record<string, unknown> = Record<string, unknown>
+    >(fn: (tx: DrizzleDb<TSchema>) => Promise<T>): Promise<T> {
         const db = this.getDb<TSchema>();
         const start = Date.now();
+
         try {
             const result = await db.transaction(fn);
 
@@ -120,9 +157,8 @@ export class PostgresService implements OnModuleDestroy {
         }
     }
 
-
     /* -------------------------------------------------------------------------- */
-    /*                               Health checks                                */
+    /*                               Health check                                 */
     /* -------------------------------------------------------------------------- */
 
     async testConnection(): Promise<{
@@ -145,7 +181,7 @@ export class PostgresService implements OnModuleDestroy {
 
             this.metrics?.recordPostgresQuery(
                 "healthcheck",
-                (Date.now() - start) / 1000,
+                duration / 1000,
                 this.config.dbName
             );
 

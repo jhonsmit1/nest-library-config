@@ -11,20 +11,20 @@ exports.DatabaseModule = void 0;
 const common_1 = require("@nestjs/common");
 const postgres_service_1 = require("./postgres/postgres.service");
 const azure_sql_service_1 = require("./azure-sql/azure-sql.service");
+const app_config_service_1 = require("../app/app-config.service");
+const database_metrics_facade_1 = require("../observability/database-metrics.facade");
 let DatabaseModule = DatabaseModule_1 = class DatabaseModule {
-    static forRoot(options = {}) {
+    static forRoot(options) {
         const providers = [];
         const exports = [];
         if (options.postgres) {
             providers.push({
                 provide: postgres_service_1.PostgresService,
-                useFactory: async (postgres) => {
-                    await postgres.connect(options.schema);
-                    return postgres;
+                useFactory: (config, metrics) => {
+                    return new postgres_service_1.PostgresService(config, metrics, options.schema);
                 },
-                inject: [postgres_service_1.PostgresService],
+                inject: [app_config_service_1.AppConfigService, database_metrics_facade_1.DatabaseMetricsFacade],
             });
-            providers.push(postgres_service_1.PostgresService);
             exports.push(postgres_service_1.PostgresService);
         }
         if (options.azureSql) {

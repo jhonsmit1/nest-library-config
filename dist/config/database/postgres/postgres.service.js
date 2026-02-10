@@ -24,51 +24,77 @@ const database_metrics_facade_1 = require("../../observability/database-metrics.
 let PostgresService = PostgresService_1 = class PostgresService {
     config;
     metrics;
+    schema;
     logger = new common_1.Logger(PostgresService_1.name);
     pool = null;
     db = null;
-    constructor(config, metrics) {
+    constructor(config, metrics, schema) {
         this.config = config;
         this.metrics = metrics;
+        this.schema = schema;
     }
-    async connect(schema) {
+    async onModuleInit() {
+        await this.connect();
+    }
+    async onModuleDestroy() {
+        await this.disconnect();
+    }
+    async connect() {
         if (this.db) {
-            this.logger.warn("Postgres already connected. connect() ignored.");
+            this.logger.warn("Postgres already connected. Skipping connect().");
             return;
         }
         const isTest = this.config.env === "test";
-        this.pool = new pg_1.Pool({
-            user: isTest ? this.config.testDbUser : this.config.dbUser,
-            host: isTest ? this.config.testDbHost : this.config.dbHost,
-            database: isTest ? this.config.testDbName : this.config.dbName,
-            password: isTest ? this.config.testDbPassword : this.config.dbPassword,
-            port: Number(isTest ? this.config.testDbPort : this.config.dbPort),
-            ssl: this.config.useSSL === "true" ? { rejectUnauthorized: false } : undefined,
-            max: this.config.dbMaxConnections,
-        });
-        this.pool.on("connect", () => {
-            this.logger.debug("Postgres pool: client connected");
-        });
-        this.pool.on("error", (error) => {
-            this.logger.error("Postgres pool error", error);
-        });
-        this.db = (0, node_postgres_1.drizzle)(this.pool, { schema });
-        if (this.config.runMigrations && this.config.env !== "production") {
-            await (0, migrator_1.migrate)(this.db, { migrationsFolder: "drizzle" });
-            this.logger.log("Postgres migrations executed");
+        try {
+            this.pool = new pg_1.Pool({
+                user: isTest ? this.config.testDbUser : this.config.dbUser,
+                host: isTest ? this.config.testDbHost : this.config.dbHost,
+                database: isTest ? this.config.testDbName : this.config.dbName,
+                password: isTest
+                    ? this.config.testDbPassword
+                    : this.config.dbPassword,
+                port: Number(isTest ? this.config.testDbPort : this.config.dbPort),
+                ssl: this.config.useSSL === "true"
+                    ? { rejectUnauthorized: false }
+                    : undefined,
+                max: this.config.dbMaxConnections,
+            });
+            this.pool.on("connect", () => {
+                this.logger.debug("Postgres pool: client connected");
+            });
+            this.pool.on("error", (error) => {
+                this.logger.error("Postgres pool error", error);
+            });
+            this.db = (0, node_postgres_1.drizzle)(this.pool, {
+                schema: this.schema,
+            });
+            if (this.config.runMigrations && this.config.env !== "production") {
+                await (0, migrator_1.migrate)(this.db, { migrationsFolder: "drizzle" });
+                this.logger.log("Postgres migrations executed");
+            }
+            this.logger.log("PostgreSQL connected successfully");
         }
-        this.logger.log("PostgreSQL connected");
+        catch (error) {
+            this.logger.error("Failed to connect to PostgreSQL", error);
+            this.pool = null;
+            this.db = null;
+            throw error;
+        }
     }
     async disconnect() {
         if (!this.pool)
             return;
-        await this.pool.end();
-        this.pool = null;
-        this.db = null;
-        this.logger.log("PostgreSQL disconnected");
-    }
-    async onModuleDestroy() {
-        await this.disconnect();
+        try {
+            await this.pool.end();
+            this.logger.log("PostgreSQL disconnected");
+        }
+        catch (error) {
+            this.logger.error("Error disconnecting PostgreSQL", error);
+        }
+        finally {
+            this.pool = null;
+            this.db = null;
+        }
     }
     getDb() {
         if (!this.db) {
@@ -100,7 +126,7 @@ let PostgresService = PostgresService_1 = class PostgresService {
         try {
             await this.getDb().execute((0, drizzle_orm_1.sql) `SELECT current_database(), now();`);
             const duration = Date.now() - start;
-            this.metrics?.recordPostgresQuery("healthcheck", (Date.now() - start) / 1000, this.config.dbName);
+            this.metrics?.recordPostgresQuery("healthcheck", duration / 1000, this.config.dbName);
             return { success: true, duration };
         }
         catch (error) {
@@ -116,5 +142,5 @@ exports.PostgresService = PostgresService = PostgresService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(1, (0, common_1.Optional)()),
     __metadata("design:paramtypes", [app_config_service_1.AppConfigService,
-        database_metrics_facade_1.DatabaseMetricsFacade])
+        database_metrics_facade_1.DatabaseMetricsFacade, Object])
 ], PostgresService);
