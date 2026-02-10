@@ -59,6 +59,7 @@ export class PostgresService implements OnModuleDestroy {
 
         this.db = drizzle(this.pool, { schema });
 
+        // esto se debe validar si se debe quitar
         if (this.config.runMigrations && this.config.env !== "production") {
             await migrate(this.db, { migrationsFolder: "drizzle" });
             this.logger.log("Postgres migrations executed");

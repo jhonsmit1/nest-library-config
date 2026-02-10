@@ -16,14 +16,6 @@ let DatabaseModule = DatabaseModule_1 = class DatabaseModule {
         const providers = [];
         const exports = [];
         if (options.postgres) {
-            providers.push({
-                provide: postgres_service_1.PostgresService,
-                useFactory: async (postgres) => {
-                    await postgres.connect(options.schema);
-                    return postgres;
-                },
-                inject: [postgres_service_1.PostgresService],
-            });
             providers.push(postgres_service_1.PostgresService);
             exports.push(postgres_service_1.PostgresService);
         }
