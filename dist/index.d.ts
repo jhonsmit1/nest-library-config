@@ -7,4 +7,5 @@ export * from "./config/database/database.module";
 export * from "./config/database/database.options";
 export * from "./config/database/database.client";
 export * from "./config/database/database.tokens";
+export * from "./config/database/database.metrics.token";
 export * from "./config/database/postgres/postgres.types";
