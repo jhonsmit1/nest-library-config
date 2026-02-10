@@ -12,9 +12,10 @@ import { sql } from "drizzle-orm";
 import { AppConfigService } from "../../app/app-config.service";
 import { DatabaseMetricsFacade } from "../../observability/database-metrics.facade";
 import { DrizzleDb } from "./postgres.types";
+import { DatabaseClient } from "../database.client";
 
 @Injectable()
-export class PostgresService implements OnModuleInit, OnModuleDestroy {
+export class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDestroy {
     private readonly logger = new Logger(PostgresService.name);
 
     private pool: Pool | null = null;

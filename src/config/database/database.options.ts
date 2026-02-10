@@ -1,4 +1,4 @@
 export interface DatabaseModuleOptions {
-  postgres?: boolean;
-  azureSql?: boolean;
+    postgres?: boolean;
+    azureSql?: boolean;
 }

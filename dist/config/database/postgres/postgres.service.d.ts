@@ -2,7 +2,8 @@ import { OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { AppConfigService } from "../../app/app-config.service";
 import { DatabaseMetricsFacade } from "../../observability/database-metrics.facade";
 import { DrizzleDb } from "./postgres.types";
-export declare class PostgresService implements OnModuleInit, OnModuleDestroy {
+import { DatabaseClient } from "../database.client";
+export declare class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDestroy {
     private readonly config;
     private readonly metrics?;
     private readonly schema?;

@@ -13,10 +13,10 @@ const postgres_service_1 = require("./postgres/postgres.service");
 const azure_sql_service_1 = require("./azure-sql/azure-sql.service");
 const app_config_service_1 = require("../app/app-config.service");
 const database_metrics_facade_1 = require("../observability/database-metrics.facade");
+const database_tokens_1 = require("./database.tokens");
 let DatabaseModule = DatabaseModule_1 = class DatabaseModule {
     static forRoot(options) {
         const providers = [];
-        const exports = [];
         if (options.postgres) {
             providers.push({
                 provide: postgres_service_1.PostgresService,
@@ -24,17 +24,21 @@ let DatabaseModule = DatabaseModule_1 = class DatabaseModule {
                     return new postgres_service_1.PostgresService(config, metrics, options.schema);
                 },
                 inject: [app_config_service_1.AppConfigService, database_metrics_facade_1.DatabaseMetricsFacade],
+            }, {
+                provide: database_tokens_1.DATABASE_CLIENT,
+                useExisting: postgres_service_1.PostgresService,
             });
-            exports.push(postgres_service_1.PostgresService);
         }
         if (options.azureSql) {
-            providers.push(azure_sql_service_1.AzureSqlService);
-            exports.push(azure_sql_service_1.AzureSqlService);
+            providers.push(azure_sql_service_1.AzureSqlService, {
+                provide: database_tokens_1.DATABASE_CLIENT,
+                useExisting: azure_sql_service_1.AzureSqlService,
+            });
         }
         return {
             module: DatabaseModule_1,
             providers,
-            exports,
+            exports: [database_tokens_1.DATABASE_CLIENT],
         };
     }
 };

@@ -4,6 +4,7 @@ import { PostgresService } from "./postgres/postgres.service";
 import { AzureSqlService } from "./azure-sql/azure-sql.service";
 import { AppConfigService } from "../app/app-config.service";
 import { DatabaseMetricsFacade } from "../observability/database-metrics.facade";
+import { DATABASE_CLIENT } from "./database.tokens";
 
 @Global()
 @Module({})
@@ -12,32 +13,40 @@ export class DatabaseModule {
         options: DatabaseModuleOptions & { schema?: TSchema }
     ): DynamicModule {
         const providers: Provider[] = [];
-        const exports: Provider[] = [];
 
         if (options.postgres) {
-            providers.push({
-                provide: PostgresService,
-                useFactory: (
-                    config: AppConfigService,
-                    metrics?: DatabaseMetricsFacade
-                ) => {
-                    return new PostgresService(config, metrics, options.schema);
+            providers.push(
+                {
+                    provide: PostgresService,
+                    useFactory: (
+                        config: AppConfigService,
+                        metrics?: DatabaseMetricsFacade
+                    ) => {
+                        return new PostgresService(config, metrics, options.schema);
+                    },
+                    inject: [AppConfigService, DatabaseMetricsFacade],
                 },
-                inject: [AppConfigService, DatabaseMetricsFacade],
-            });
-
-            exports.push(PostgresService);
+                {
+                    provide: DATABASE_CLIENT,
+                    useExisting: PostgresService,
+                }
+            );
         }
 
         if (options.azureSql) {
-            providers.push(AzureSqlService);
-            exports.push(AzureSqlService);
+            providers.push(
+                AzureSqlService,
+                {
+                    provide: DATABASE_CLIENT,
+                    useExisting: AzureSqlService,
+                }
+            );
         }
 
         return {
             module: DatabaseModule,
             providers,
-            exports,
+            exports: [DATABASE_CLIENT],
         };
     }
 }
