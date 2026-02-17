@@ -9,10 +9,16 @@ import { DATABASE_SCHEMA } from "./database.schema.token";
 @Module({})
 export class DatabaseModule {
   static forRoot<TSchema extends Record<string, unknown>>(
-    options: DatabaseModuleOptions & { schema?: TSchema }
+    options: DatabaseModuleOptions & {
+      schema?: TSchema;
+      metricsProvider?: Provider;
+    }
   ): DynamicModule {
-
     const providers: Provider[] = [];
+
+    if (options.metricsProvider) {
+      providers.push(options.metricsProvider);
+    }
 
     if (options.postgres) {
       providers.push(

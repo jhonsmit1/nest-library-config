@@ -16,6 +16,9 @@ const database_schema_token_1 = require("./database.schema.token");
 let DatabaseModule = DatabaseModule_1 = class DatabaseModule {
     static forRoot(options) {
         const providers = [];
+        if (options.metricsProvider) {
+            providers.push(options.metricsProvider);
+        }
         if (options.postgres) {
             providers.push({
                 provide: database_schema_token_1.DATABASE_SCHEMA,
