@@ -145,24 +145,32 @@ export class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDe
         T,
         TSchema extends Record<string, unknown> = Record<string, unknown>
     >(fn: (tx: DrizzleDb<TSchema>) => Promise<T>): Promise<T> {
+
+        console.log("withTransaction called");
+
         const db = this.getDb<TSchema>();
         const start = Date.now();
 
         try {
             const result = await db.transaction(fn);
 
+            const duration = (Date.now() - start) / 1000;
+
+            console.log("Transaction finished, duration:", duration);
+
             this.metrics?.recordPostgresQuery(
                 "transaction",
-                (Date.now() - start) / 1000,
+                duration,
                 this.config.dbName
             );
 
             return result;
         } catch (error) {
-            this.logger.error("Postgres transaction failed", error);
+            console.log("Transaction failed");
             throw error;
         }
     }
+
 
     /* -------------------------------------------------------------------------- */
     /*                               Health check                                 */

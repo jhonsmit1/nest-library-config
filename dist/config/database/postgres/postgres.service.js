@@ -107,15 +107,18 @@ let PostgresService = PostgresService_1 = class PostgresService {
         return !!this.db && !!this.pool;
     }
     async withTransaction(fn) {
+        console.log("withTransaction called");
         const db = this.getDb();
         const start = Date.now();
         try {
             const result = await db.transaction(fn);
-            this.metrics?.recordPostgresQuery("transaction", (Date.now() - start) / 1000, this.config.dbName);
+            const duration = (Date.now() - start) / 1000;
+            console.log("Transaction finished, duration:", duration);
+            this.metrics?.recordPostgresQuery("transaction", duration, this.config.dbName);
             return result;
         }
         catch (error) {
-            this.logger.error("Postgres transaction failed", error);
+            console.log("Transaction failed");
             throw error;
         }
     }
