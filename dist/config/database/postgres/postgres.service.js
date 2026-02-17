@@ -21,6 +21,7 @@ const pg_1 = require("pg");
 const drizzle_orm_1 = require("drizzle-orm");
 const app_config_service_1 = require("../../app/app-config.service");
 const database_metrics_token_1 = require("../database.metrics.token");
+const database_schema_token_1 = require("../database.schema.token");
 let PostgresService = PostgresService_1 = class PostgresService {
     config;
     metrics;
@@ -142,5 +143,7 @@ exports.PostgresService = PostgresService = PostgresService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(1, (0, common_1.Optional)()),
     __param(1, (0, common_1.Inject)(database_metrics_token_1.DATABASE_METRICS)),
+    __param(2, (0, common_1.Optional)()),
+    __param(2, (0, common_1.Inject)(database_schema_token_1.DATABASE_SCHEMA)),
     __metadata("design:paramtypes", [app_config_service_1.AppConfigService, Object, Object])
 ], PostgresService);

@@ -15,6 +15,7 @@ import { DrizzleDb } from "./postgres.types";
 import { DatabaseClient } from "../database.client";
 import { DATABASE_METRICS } from "../database.metrics.token";
 import { DatabaseMetrics } from "../database.metrics";
+import { DATABASE_SCHEMA } from "../database.schema.token";
 
 @Injectable()
 export class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDestroy {
@@ -32,6 +33,8 @@ export class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDe
          * El schema es CONFIGURACION del modulo,
          * no algo que se pase dinamicamente en runtime
          */
+        @Optional()
+        @Inject(DATABASE_SCHEMA)
         private readonly schema?: Record<string, unknown>
     ) { }
 

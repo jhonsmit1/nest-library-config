@@ -11,20 +11,16 @@ exports.DatabaseModule = void 0;
 const common_1 = require("@nestjs/common");
 const postgres_service_1 = require("./postgres/postgres.service");
 const azure_sql_service_1 = require("./azure-sql/azure-sql.service");
-const app_config_service_1 = require("../app/app-config.service");
 const database_tokens_1 = require("./database.tokens");
-const database_metrics_token_1 = require("./database.metrics.token");
+const database_schema_token_1 = require("./database.schema.token");
 let DatabaseModule = DatabaseModule_1 = class DatabaseModule {
     static forRoot(options) {
         const providers = [];
         if (options.postgres) {
             providers.push({
-                provide: postgres_service_1.PostgresService,
-                useFactory: (config, metrics) => {
-                    return new postgres_service_1.PostgresService(config, metrics, options.schema);
-                },
-                inject: [app_config_service_1.AppConfigService, database_metrics_token_1.DATABASE_METRICS],
-            }, {
+                provide: database_schema_token_1.DATABASE_SCHEMA,
+                useValue: options.schema,
+            }, postgres_service_1.PostgresService, {
                 provide: database_tokens_1.DATABASE_CLIENT,
                 useExisting: postgres_service_1.PostgresService,
             });
