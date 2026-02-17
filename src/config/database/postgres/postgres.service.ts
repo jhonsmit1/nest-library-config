@@ -36,7 +36,10 @@ export class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDe
         @Optional()
         @Inject(DATABASE_SCHEMA)
         private readonly schema?: Record<string, unknown>
-    ) { }
+    ) {
+        console.log("Metrics injected?", !!this.metrics);
+
+    }
 
     /* -------------------------------------------------------------------------- */
     /*                               Lifecycle                                    */

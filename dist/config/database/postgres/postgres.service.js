@@ -33,6 +33,7 @@ let PostgresService = PostgresService_1 = class PostgresService {
         this.config = config;
         this.metrics = metrics;
         this.schema = schema;
+        console.log("Metrics injected?", !!this.metrics);
     }
     async onModuleInit() {
         await this.connect();
