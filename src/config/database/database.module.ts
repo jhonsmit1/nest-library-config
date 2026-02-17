@@ -5,7 +5,6 @@ import { AzureSqlService } from "./azure-sql/azure-sql.service";
 import { AppConfigService } from "../app/app-config.service";
 import { DATABASE_CLIENT } from "./database.tokens";
 import { DATABASE_METRICS } from "./database.metrics.token";
-import { NoopDatabaseMetrics } from "./noop-database-metrics";
 import { DatabaseMetrics } from "./database.metrics";
 
 @Global()
@@ -15,12 +14,7 @@ export class DatabaseModule {
         options: DatabaseModuleOptions & { schema?: TSchema }
     ): DynamicModule {
 
-        const providers: Provider[] = [
-            {
-                provide: DATABASE_METRICS,
-                useClass: NoopDatabaseMetrics,
-            },
-        ];
+        const providers: Provider[] = [];
 
         if (options.postgres) {
             providers.push(

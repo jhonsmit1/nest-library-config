@@ -14,15 +14,9 @@ const azure_sql_service_1 = require("./azure-sql/azure-sql.service");
 const app_config_service_1 = require("../app/app-config.service");
 const database_tokens_1 = require("./database.tokens");
 const database_metrics_token_1 = require("./database.metrics.token");
-const noop_database_metrics_1 = require("./noop-database-metrics");
 let DatabaseModule = DatabaseModule_1 = class DatabaseModule {
     static forRoot(options) {
-        const providers = [
-            {
-                provide: database_metrics_token_1.DATABASE_METRICS,
-                useClass: noop_database_metrics_1.NoopDatabaseMetrics,
-            },
-        ];
+        const providers = [];
         if (options.postgres) {
             providers.push({
                 provide: postgres_service_1.PostgresService,

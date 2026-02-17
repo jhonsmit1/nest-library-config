@@ -4,6 +4,7 @@ import {
     OnModuleInit,
     OnModuleDestroy,
     Inject,
+    Optional,
 } from "@nestjs/common";
 import knex, { Knex } from "knex";
 import { AppConfigService } from "../../app/app-config.service";
@@ -17,8 +18,9 @@ export class AzureSqlService implements OnModuleInit, OnModuleDestroy {
 
     constructor(
         private readonly config: AppConfigService,
+        @Optional()
         @Inject(DATABASE_METRICS)
-        private readonly metrics: DatabaseMetrics
+        private readonly metrics?: DatabaseMetrics
     ) { }
 
     /* -------------------------------------------------------------------------- */
@@ -135,7 +137,7 @@ export class AzureSqlService implements OnModuleInit, OnModuleDestroy {
             const executionTime = Date.now() - start;
 
             try {
-                this.metrics.recordAzureSqlQuery(
+                this.metrics?.recordAzureSqlQuery(
                     "healthcheck",
                     executionTime / 1000,
                     this.config.azureSqlDatabase

@@ -5,12 +5,12 @@ import { DatabaseClient } from "../database.client";
 import { DatabaseMetrics } from "../database.metrics";
 export declare class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDestroy {
     private readonly config;
-    private readonly metrics;
+    private readonly metrics?;
     private readonly schema?;
     private readonly logger;
     private pool;
     private db;
-    constructor(config: AppConfigService, metrics: DatabaseMetrics, schema?: Record<string, unknown> | undefined);
+    constructor(config: AppConfigService, metrics?: DatabaseMetrics | undefined, schema?: Record<string, unknown> | undefined);
     onModuleInit(): Promise<void>;
     onModuleDestroy(): Promise<void>;
     private connect;

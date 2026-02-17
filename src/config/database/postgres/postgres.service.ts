@@ -3,7 +3,8 @@ import {
     Injectable,
     Logger,
     OnModuleDestroy,
-    OnModuleInit
+    OnModuleInit,
+    Optional
 } from "@nestjs/common";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
@@ -24,8 +25,9 @@ export class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDe
 
     constructor(
         private readonly config: AppConfigService,
+        @Optional()
         @Inject(DATABASE_METRICS)
-        private readonly metrics: DatabaseMetrics,
+        private readonly metrics?: DatabaseMetrics,
         /**
          * El schema es CONFIGURACION del modulo,
          * no algo que se pase dinamicamente en runtime
@@ -146,7 +148,7 @@ export class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDe
         try {
             const result = await db.transaction(fn);
 
-            this.metrics.recordPostgresQuery(
+            this.metrics?.recordPostgresQuery(
                 "transaction",
                 (Date.now() - start) / 1000,
                 this.config.dbName
@@ -181,7 +183,7 @@ export class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDe
 
             const duration = Date.now() - start;
 
-            this.metrics.recordPostgresQuery(
+            this.metrics?.recordPostgresQuery(
                 "healthcheck",
                 duration / 1000,
                 this.config.dbName

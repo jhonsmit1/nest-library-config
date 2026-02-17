@@ -104,7 +104,7 @@ let AzureSqlService = AzureSqlService_1 = class AzureSqlService {
             await this.getKnex().raw("SELECT 1");
             const executionTime = Date.now() - start;
             try {
-                this.metrics.recordAzureSqlQuery("healthcheck", executionTime / 1000, this.config.azureSqlDatabase);
+                this.metrics?.recordAzureSqlQuery("healthcheck", executionTime / 1000, this.config.azureSqlDatabase);
             }
             catch (metricsError) {
                 this.logger.error("Failed to record Azure SQL metrics", metricsError);
@@ -128,6 +128,7 @@ let AzureSqlService = AzureSqlService_1 = class AzureSqlService {
 exports.AzureSqlService = AzureSqlService;
 exports.AzureSqlService = AzureSqlService = AzureSqlService_1 = __decorate([
     (0, common_1.Injectable)(),
+    __param(1, (0, common_1.Optional)()),
     __param(1, (0, common_1.Inject)(database_metrics_token_1.DATABASE_METRICS)),
     __metadata("design:paramtypes", [app_config_service_1.AppConfigService, Object])
 ], AzureSqlService);
