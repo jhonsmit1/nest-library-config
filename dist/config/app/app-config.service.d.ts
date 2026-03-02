@@ -1,13 +1,11 @@
-import { OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { AppConfigModuleOptions } from "./app-config.interfaces";
-export declare class AppConfigService implements OnModuleInit {
+export declare class AppConfigService {
     private readonly configService;
     private readonly options;
-    private validatedConfig?;
+    private readonly validatedConfig?;
     private readonly cache;
     constructor(configService: ConfigService, options: AppConfigModuleOptions);
-    onModuleInit(): void;
     private validateEnvironment;
     private resolveValue;
     get<T = unknown>(key: string): T | undefined;

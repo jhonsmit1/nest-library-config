@@ -1,226 +1,223 @@
-import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { ZodSchema } from "zod";
 import { APP_CONFIG_OPTIONS } from "./app-config.constants";
 import { AppConfigModuleOptions } from "./app-config.interfaces";
 
 @Injectable()
-export class AppConfigService implements OnModuleInit {
-    private validatedConfig?: Record<string, any>;
-    private readonly cache = new Map<string, any>();
+export class AppConfigService {
+  private readonly validatedConfig?: Record<string, any>;
+  private readonly cache = new Map<string, any>();
 
-    constructor(
-        private readonly configService: ConfigService,
-        @Inject(APP_CONFIG_OPTIONS)
-        private readonly options: AppConfigModuleOptions
-    ) { }
+  constructor(
+    private readonly configService: ConfigService,
+    @Inject(APP_CONFIG_OPTIONS)
+    private readonly options: AppConfigModuleOptions
+  ) {
+    if (this.options.schema) {
+      this.validatedConfig = this.validateEnvironment(this.options.schema);
+    }
+  }
 
-    onModuleInit() {
-        if (this.options.schema) {
-            this.validateEnvironment(this.options.schema);
-        }
+  private validateEnvironment(schema: ZodSchema<any>): Record<string, any> {
+    const result = schema.safeParse(process.env);
+
+    if (!result.success) {
+      console.error(result.error.format());
+      throw new Error("Invalid environment configuration");
     }
 
-    private validateEnvironment(schema: ZodSchema<any>) {
-        const result = schema.safeParse(process.env);
+    return result.data;
+  }
 
-        if (!result.success) {
-            console.error(result.error.format());
-            throw new Error("Invalid environment configuration");
-        }
-
-        this.validatedConfig = result.data;
+  private resolveValue<T>(key: string): T | undefined {
+    if (this.validatedConfig) {
+      return this.validatedConfig[key] as T;
     }
 
-    private resolveValue<T>(key: string): T | undefined {
-        if (this.validatedConfig) {
-            return this.validatedConfig[key] as T;
-        }
+    return this.configService.get<T>(key);
+  }
 
-        return this.configService.get<T>(key);
+  get<T = unknown>(key: string): T | undefined {
+    if (this.options.cache && this.cache.has(key)) {
+      return this.cache.get(key);
     }
 
-    get<T = unknown>(key: string): T | undefined {
-        if (this.options.cache && this.cache.has(key)) {
-            return this.cache.get(key);
-        }
+    const value = this.resolveValue<T>(key);
 
-        const value = this.resolveValue<T>(key);
-
-        if (this.options.cache) {
-            this.cache.set(key, value);
-        }
-
-        return value;
+    if (this.options.cache) {
+      this.cache.set(key, value);
     }
 
-    getOrThrow<T = unknown>(key: string): T {
-        const value = this.get<T>(key);
+    return value;
+  }
 
-        if (value === undefined) {
-            throw new Error(`Configuration key "${key}" is missing`);
-        }
+  getOrThrow<T = unknown>(key: string): T {
+    const value = this.get<T>(key);
 
-        return value;
+    if (value === undefined) {
+      throw new Error(`Configuration key "${key}" is missing`);
     }
 
-    /* ===========================
-       GETTERS TIPADOS (CLAVE)
-       =========================== */
+    return value;
+  }
 
-    get env(): string {
-        return this.getOrThrow<string>("NODE_ENV");
-    }
+  /* ===========================
+     GETTERS TIPADOS
+     =========================== */
 
-    get port(): number {
-        return this.getOrThrow<number>("PORT");
-    }
+  get env(): string {
+    return this.getOrThrow<string>("NODE_ENV");
+  }
 
-    get corsAllowedOrigins(): string[] {
-        return this.get<string[]>("CORS_ALLOWED_ORIGINS") ?? [];
-    }
+  get port(): number {
+    return this.getOrThrow<number>("PORT");
+  }
 
-    get dbHost(): string {
-        return this.getOrThrow<string>("DB_HOST");
-    }
+  get corsAllowedOrigins(): string[] {
+    return this.get<string[]>("CORS_ALLOWED_ORIGINS") ?? [];
+  }
 
-    get dbPort(): number {
-        return this.getOrThrow<number>("DB_PORT");
-    }
+  get dbHost(): string {
+    return this.getOrThrow<string>("DB_HOST");
+  }
 
-    get dbUser(): string {
-        return this.getOrThrow<string>("DB_USER");
-    }
+  get dbPort(): number {
+    return this.getOrThrow<number>("DB_PORT");
+  }
 
-    get dbPassword(): string {
-        return this.getOrThrow<string>("DB_PASSWORD");
-    }
+  get dbUser(): string {
+    return this.getOrThrow<string>("DB_USER");
+  }
 
-    get dbName(): string {
-        return this.getOrThrow<string>("DB_NAME");
-    }
+  get dbPassword(): string {
+    return this.getOrThrow<string>("DB_PASSWORD");
+  }
 
-    get dbMaxConnections(): number {
-        return this.getOrThrow<number>("DB_MAX_CONNECTIONS");
-    }
+  get dbName(): string {
+    return this.getOrThrow<string>("DB_NAME");
+  }
 
-    get runMigrations(): boolean {
-        return this.get<boolean>("RUN_MIGRATIONS") ?? false;
-    }
+  get dbMaxConnections(): number {
+    return this.getOrThrow<number>("DB_MAX_CONNECTIONS");
+  }
 
-    get useSSL(): boolean {
-        return this.get<boolean>("USE_SSL") ?? false;
-    }
+  get runMigrations(): boolean {
+    return this.get<boolean>("RUN_MIGRATIONS") ?? false;
+  }
 
-    get azureSqlServer(): string {
-        return this.getOrThrow<string>("AZURE_SQL_SERVER");
-    }
+  get useSSL(): boolean {
+    return this.get<boolean>("USE_SSL") ?? false;
+  }
 
-    get azureSqlDatabase(): string {
-        return this.getOrThrow<string>("AZURE_SQL_DATABASE");
-    }
+  /* ===========================
+     AZURE SQL
+     =========================== */
 
-    get azureSqlUser(): string {
-        return this.getOrThrow<string>("AZURE_SQL_USER");
-    }
+  get azureSqlServer(): string {
+    return this.getOrThrow<string>("AZURE_SQL_SERVER");
+  }
 
-    get azureSqlPassword(): string {
-        return this.getOrThrow<string>("AZURE_SQL_PASSWORD");
-    }
+  get azureSqlDatabase(): string {
+    return this.getOrThrow<string>("AZURE_SQL_DATABASE");
+  }
 
-    get azureSqlPort(): number {
-        return this.getOrThrow<number>("AZURE_SQL_PORT");
-    }
+  get azureSqlUser(): string {
+    return this.getOrThrow<string>("AZURE_SQL_USER");
+  }
 
-    get azureSqlEncrypt(): boolean {
-        return this.getOrThrow<boolean>("AZURE_SQL_ENCRYPT");
-    }
+  get azureSqlPassword(): string {
+    return this.getOrThrow<string>("AZURE_SQL_PASSWORD");
+  }
 
-    get azureSqlTrustServerCertificate(): boolean {
-        return this.get<string>("AZURE_SQL_TRUST_SERVER_CERTIFICATE") === "true";
-    }
+  get azureSqlPort(): number {
+    return this.getOrThrow<number>("AZURE_SQL_PORT");
+  }
 
-    /* ===========================
-   TEST DB GETTERS
-   =========================== */
+  get azureSqlEncrypt(): boolean {
+    return this.getOrThrow<boolean>("AZURE_SQL_ENCRYPT");
+  }
 
-    get testDbHost(): string {
-        return this.getOrThrow<string>("TEST_DB_HOST");
-    }
+  get azureSqlTrustServerCertificate(): boolean {
+    return this.get<string>("AZURE_SQL_TRUST_SERVER_CERTIFICATE") === "true";
+  }
 
-    get testDbPort(): number {
-        return Number(this.getOrThrow<string>("TEST_DB_PORT"));
-    }
+  /* ===========================
+     TEST DB
+     =========================== */
 
-    get testDbUser(): string {
-        return this.getOrThrow<string>("TEST_DB_USER");
-    }
+  get testDbHost(): string {
+    return this.getOrThrow<string>("TEST_DB_HOST");
+  }
 
-    get testDbPassword(): string {
-        return this.getOrThrow<string>("TEST_DB_PASSWORD");
-    }
+  get testDbPort(): number {
+    return Number(this.getOrThrow<string>("TEST_DB_PORT"));
+  }
 
-    get testDbName(): string {
-        return this.getOrThrow<string>("TEST_DB_NAME");
-    }
+  get testDbUser(): string {
+    return this.getOrThrow<string>("TEST_DB_USER");
+  }
 
-    get heliosApiKey(): string {
-        return this.getOrThrow<string>("HELIOS_API_KEY");
-    }
+  get testDbPassword(): string {
+    return this.getOrThrow<string>("TEST_DB_PASSWORD");
+  }
 
-    /* ===========================
-       LOKI CONFIGURATION
-       =========================== */
+  get testDbName(): string {
+    return this.getOrThrow<string>("TEST_DB_NAME");
+  }
 
-    get lokiEndpoint(): string | undefined {
-        return this.get<string>("LOKI_ENDPOINT");
-    }
+  get heliosApiKey(): string {
+    return this.getOrThrow<string>("HELIOS_API_KEY");
+  }
 
-    get lokiUsername(): string | undefined {
-        return this.get<string>("LOKI_USERNAME");
-    }
+  /* ===========================
+     OBSERVABILIDAD
+     =========================== */
 
-    get lokiPassword(): string | undefined {
-        return this.get<string>("LOKI_PASSWORD");
-    }
+  get lokiEndpoint(): string | undefined {
+    return this.get<string>("LOKI_ENDPOINT");
+  }
 
-    /* ===========================
-       CLOUDWATCH CONFIGURATION
-       =========================== */
+  get lokiUsername(): string | undefined {
+    return this.get<string>("LOKI_USERNAME");
+  }
 
-    get awsRegion(): string | undefined {
-        return this.get<string>("AWS_REGION");
-    }
+  get lokiPassword(): string | undefined {
+    return this.get<string>("LOKI_PASSWORD");
+  }
 
-    get cloudwatchLogGroup(): string | undefined {
-        return this.get<string>("CLOUDWATCH_LOG_GROUP");
-    }
+  get awsRegion(): string | undefined {
+    return this.get<string>("AWS_REGION");
+  }
 
-    get cloudwatchLogStream(): string | undefined {
-        return this.get<string>("CLOUDWATCH_LOG_STREAM");
-    }
+  get cloudwatchLogGroup(): string | undefined {
+    return this.get<string>("CLOUDWATCH_LOG_GROUP");
+  }
 
-    /* ===========================
-       LOGGER CONFIGURATION
-       =========================== */
+  get cloudwatchLogStream(): string | undefined {
+    return this.get<string>("CLOUDWATCH_LOG_STREAM");
+  }
 
-    get logLevel():
-        | "error"
-        | "warn"
-        | "info"
-        | "http"
-        | "verbose"
-        | "debug"
-        | "silly" {
-        return this.getOrThrow<
-            | "error"
-            | "warn"
-            | "info"
-            | "http"
-            | "verbose"
-            | "debug"
-            | "silly"
-        >("LOG_LEVEL");
-    }
+  /* ===========================
+     LOGGER
+     =========================== */
 
+  get logLevel():
+    | "error"
+    | "warn"
+    | "info"
+    | "http"
+    | "verbose"
+    | "debug"
+    | "silly" {
+    return this.getOrThrow<
+      | "error"
+      | "warn"
+      | "info"
+      | "http"
+      | "verbose"
+      | "debug"
+      | "silly"
+    >("LOG_LEVEL");
+  }
 }

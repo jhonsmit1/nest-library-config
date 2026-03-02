@@ -24,10 +24,8 @@ let AppConfigService = class AppConfigService {
     constructor(configService, options) {
         this.configService = configService;
         this.options = options;
-    }
-    onModuleInit() {
         if (this.options.schema) {
-            this.validateEnvironment(this.options.schema);
+            this.validatedConfig = this.validateEnvironment(this.options.schema);
         }
     }
     validateEnvironment(schema) {
@@ -36,7 +34,7 @@ let AppConfigService = class AppConfigService {
             console.error(result.error.format());
             throw new Error("Invalid environment configuration");
         }
-        this.validatedConfig = result.data;
+        return result.data;
     }
     resolveValue(key) {
         if (this.validatedConfig) {
