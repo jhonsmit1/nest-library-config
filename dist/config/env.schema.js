@@ -40,11 +40,12 @@ exports.envSchema = zod_1.z.object({
     AZURE_SQL_PORT: zod_1.z
         .string()
         .default("1433")
-        .describe("Azure SQL Database port"),
+        .transform((val) => parseInt(val, 10))
+        .pipe(zod_1.z.number()),
     AZURE_SQL_ENCRYPT: zod_1.z
         .string()
         .default("true")
-        .describe("Enable encryption for Azure SQL connection"),
+        .transform((val) => val === "true"),
     AZURE_SQL_TRUST_SERVER_CERTIFICATE: zod_1.z
         .string()
         .default("false")
@@ -56,4 +57,19 @@ exports.envSchema = zod_1.z.object({
     HELIOS_API_KEY: zod_1.z
         .string()
         .describe("The key used to authenticate incoming requests from Helios API"),
+    LOKI_ENDPOINT: zod_1.z.string().optional().describe("Loki endpoint for logs"),
+    LOKI_USERNAME: zod_1.z.string().optional().describe("Loki username"),
+    LOKI_PASSWORD: zod_1.z.string().optional().describe("Loki password"),
+    AWS_REGION: zod_1.z.string().optional().describe("AWS region for CloudWatch"),
+    CLOUDWATCH_LOG_GROUP: zod_1.z
+        .string()
+        .optional()
+        .describe("CloudWatch log group name"),
+    CLOUDWATCH_LOG_STREAM: zod_1.z
+        .string()
+        .optional()
+        .describe("CloudWatch log stream name"),
+    LOG_LEVEL: zod_1.z
+        .enum(["error", "warn", "info", "http", "verbose", "debug", "silly"])
+        .default("debug"),
 });

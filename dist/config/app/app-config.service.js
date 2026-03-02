@@ -107,10 +107,10 @@ let AppConfigService = class AppConfigService {
         return this.getOrThrow("AZURE_SQL_PASSWORD");
     }
     get azureSqlPort() {
-        return Number(this.getOrThrow("AZURE_SQL_PORT"));
+        return this.getOrThrow("AZURE_SQL_PORT");
     }
     get azureSqlEncrypt() {
-        return this.get("AZURE_SQL_ENCRYPT") === "true";
+        return this.getOrThrow("AZURE_SQL_ENCRYPT");
     }
     get azureSqlTrustServerCertificate() {
         return this.get("AZURE_SQL_TRUST_SERVER_CERTIFICATE") === "true";
@@ -132,6 +132,27 @@ let AppConfigService = class AppConfigService {
     }
     get heliosApiKey() {
         return this.getOrThrow("HELIOS_API_KEY");
+    }
+    get lokiEndpoint() {
+        return this.get("LOKI_ENDPOINT");
+    }
+    get lokiUsername() {
+        return this.get("LOKI_USERNAME");
+    }
+    get lokiPassword() {
+        return this.get("LOKI_PASSWORD");
+    }
+    get awsRegion() {
+        return this.get("AWS_REGION");
+    }
+    get cloudwatchLogGroup() {
+        return this.get("CLOUDWATCH_LOG_GROUP");
+    }
+    get cloudwatchLogStream() {
+        return this.get("CLOUDWATCH_LOG_STREAM");
+    }
+    get logLevel() {
+        return this.getOrThrow("LOG_LEVEL");
     }
 };
 exports.AppConfigService = AppConfigService;

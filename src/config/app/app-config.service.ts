@@ -129,11 +129,11 @@ export class AppConfigService implements OnModuleInit {
     }
 
     get azureSqlPort(): number {
-        return Number(this.getOrThrow<string>("AZURE_SQL_PORT"));
+        return this.getOrThrow<number>("AZURE_SQL_PORT");
     }
 
     get azureSqlEncrypt(): boolean {
-        return this.get<string>("AZURE_SQL_ENCRYPT") === "true";
+        return this.getOrThrow<boolean>("AZURE_SQL_ENCRYPT");
     }
 
     get azureSqlTrustServerCertificate(): boolean {
@@ -166,6 +166,61 @@ export class AppConfigService implements OnModuleInit {
 
     get heliosApiKey(): string {
         return this.getOrThrow<string>("HELIOS_API_KEY");
+    }
+
+    /* ===========================
+       LOKI CONFIGURATION
+       =========================== */
+
+    get lokiEndpoint(): string | undefined {
+        return this.get<string>("LOKI_ENDPOINT");
+    }
+
+    get lokiUsername(): string | undefined {
+        return this.get<string>("LOKI_USERNAME");
+    }
+
+    get lokiPassword(): string | undefined {
+        return this.get<string>("LOKI_PASSWORD");
+    }
+
+    /* ===========================
+       CLOUDWATCH CONFIGURATION
+       =========================== */
+
+    get awsRegion(): string | undefined {
+        return this.get<string>("AWS_REGION");
+    }
+
+    get cloudwatchLogGroup(): string | undefined {
+        return this.get<string>("CLOUDWATCH_LOG_GROUP");
+    }
+
+    get cloudwatchLogStream(): string | undefined {
+        return this.get<string>("CLOUDWATCH_LOG_STREAM");
+    }
+
+    /* ===========================
+       LOGGER CONFIGURATION
+       =========================== */
+
+    get logLevel():
+        | "error"
+        | "warn"
+        | "info"
+        | "http"
+        | "verbose"
+        | "debug"
+        | "silly" {
+        return this.getOrThrow<
+            | "error"
+            | "warn"
+            | "info"
+            | "http"
+            | "verbose"
+            | "debug"
+            | "silly"
+        >("LOG_LEVEL");
     }
 
 }

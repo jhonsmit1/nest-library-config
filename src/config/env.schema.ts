@@ -23,7 +23,7 @@ export const envSchema = z.object({
         .default("3000")
         .transform((val) => parseInt(val, 10))
         .pipe(z.number()),
-        
+
     DB_USER: z.string(),
     DB_PASSWORD: z.string(),
     DB_NAME: z.string(),
@@ -49,12 +49,12 @@ export const envSchema = z.object({
     AZURE_SQL_PORT: z
         .string()
         .default("1433")
-        .describe("Azure SQL Database port"),
+        .transform((val) => parseInt(val, 10))
+        .pipe(z.number()),
     AZURE_SQL_ENCRYPT: z
         .string()
         .default("true")
-        .describe("Enable encryption for Azure SQL connection"),
-
+        .transform((val) => val === "true"),
     AZURE_SQL_TRUST_SERVER_CERTIFICATE: z
         .string()
         .default("false")
@@ -68,6 +68,26 @@ export const envSchema = z.object({
     HELIOS_API_KEY: z
         .string()
         .describe("The key used to authenticate incoming requests from Helios API"),
+
+    // Loki Configuration
+    LOKI_ENDPOINT: z.string().optional().describe("Loki endpoint for logs"),
+    LOKI_USERNAME: z.string().optional().describe("Loki username"),
+    LOKI_PASSWORD: z.string().optional().describe("Loki password"),
+
+    // CloudWatch Configuration
+    AWS_REGION: z.string().optional().describe("AWS region for CloudWatch"),
+    CLOUDWATCH_LOG_GROUP: z
+        .string()
+        .optional()
+        .describe("CloudWatch log group name"),
+    CLOUDWATCH_LOG_STREAM: z
+        .string()
+        .optional()
+        .describe("CloudWatch log stream name"),
+
+    LOG_LEVEL: z
+        .enum(["error", "warn", "info", "http", "verbose", "debug", "silly"])
+        .default("debug"),
 
 });
 

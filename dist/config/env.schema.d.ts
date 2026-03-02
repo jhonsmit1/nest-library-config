@@ -18,11 +18,18 @@ export declare const envSchema: z.ZodObject<{
     AZURE_SQL_DATABASE: z.ZodString;
     AZURE_SQL_USER: z.ZodString;
     AZURE_SQL_PASSWORD: z.ZodString;
-    AZURE_SQL_PORT: z.ZodDefault<z.ZodString>;
-    AZURE_SQL_ENCRYPT: z.ZodDefault<z.ZodString>;
+    AZURE_SQL_PORT: z.ZodPipeline<z.ZodEffects<z.ZodDefault<z.ZodString>, number, string | undefined>, z.ZodNumber>;
+    AZURE_SQL_ENCRYPT: z.ZodEffects<z.ZodDefault<z.ZodString>, boolean, string | undefined>;
     AZURE_SQL_TRUST_SERVER_CERTIFICATE: z.ZodDefault<z.ZodString>;
     RUN_MIGRATIONS: z.ZodDefault<z.ZodString>;
     HELIOS_API_KEY: z.ZodString;
+    LOKI_ENDPOINT: z.ZodOptional<z.ZodString>;
+    LOKI_USERNAME: z.ZodOptional<z.ZodString>;
+    LOKI_PASSWORD: z.ZodOptional<z.ZodString>;
+    AWS_REGION: z.ZodOptional<z.ZodString>;
+    CLOUDWATCH_LOG_GROUP: z.ZodOptional<z.ZodString>;
+    CLOUDWATCH_LOG_STREAM: z.ZodOptional<z.ZodString>;
+    LOG_LEVEL: z.ZodDefault<z.ZodEnum<["error", "warn", "info", "http", "verbose", "debug", "silly"]>>;
 }, "strip", z.ZodTypeAny, {
     NODE_ENV: "development" | "test" | "production";
     PORT: number;
@@ -38,8 +45,8 @@ export declare const envSchema: z.ZodObject<{
     AZURE_SQL_DATABASE: string;
     AZURE_SQL_USER: string;
     AZURE_SQL_PASSWORD: string;
-    AZURE_SQL_PORT: string;
-    AZURE_SQL_ENCRYPT: string;
+    AZURE_SQL_PORT: number;
+    AZURE_SQL_ENCRYPT: boolean;
     AZURE_SQL_TRUST_SERVER_CERTIFICATE: string;
     TEST_DB_HOST: string;
     TEST_DB_PORT: string;
@@ -47,6 +54,13 @@ export declare const envSchema: z.ZodObject<{
     TEST_DB_PASSWORD: string;
     TEST_DB_NAME: string;
     HELIOS_API_KEY: string;
+    LOG_LEVEL: "error" | "warn" | "info" | "http" | "verbose" | "debug" | "silly";
+    LOKI_ENDPOINT?: string | undefined;
+    LOKI_USERNAME?: string | undefined;
+    LOKI_PASSWORD?: string | undefined;
+    AWS_REGION?: string | undefined;
+    CLOUDWATCH_LOG_GROUP?: string | undefined;
+    CLOUDWATCH_LOG_STREAM?: string | undefined;
 }, {
     DB_HOST: string;
     DB_USER: string;
@@ -71,5 +85,12 @@ export declare const envSchema: z.ZodObject<{
     AZURE_SQL_PORT?: string | undefined;
     AZURE_SQL_ENCRYPT?: string | undefined;
     AZURE_SQL_TRUST_SERVER_CERTIFICATE?: string | undefined;
+    LOKI_ENDPOINT?: string | undefined;
+    LOKI_USERNAME?: string | undefined;
+    LOKI_PASSWORD?: string | undefined;
+    AWS_REGION?: string | undefined;
+    CLOUDWATCH_LOG_GROUP?: string | undefined;
+    CLOUDWATCH_LOG_STREAM?: string | undefined;
+    LOG_LEVEL?: "error" | "warn" | "info" | "http" | "verbose" | "debug" | "silly" | undefined;
 }>;
 export type EnvConfig = z.infer<typeof envSchema>;

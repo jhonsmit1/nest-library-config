@@ -36,4 +36,11 @@ export declare class AppConfigService implements OnModuleInit {
     get testDbPassword(): string;
     get testDbName(): string;
     get heliosApiKey(): string;
+    get lokiEndpoint(): string | undefined;
+    get lokiUsername(): string | undefined;
+    get lokiPassword(): string | undefined;
+    get awsRegion(): string | undefined;
+    get cloudwatchLogGroup(): string | undefined;
+    get cloudwatchLogStream(): string | undefined;
+    get logLevel(): "error" | "warn" | "info" | "http" | "verbose" | "debug" | "silly";
 }
