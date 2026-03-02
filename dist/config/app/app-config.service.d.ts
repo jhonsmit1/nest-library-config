@@ -35,4 +35,5 @@ export declare class AppConfigService implements OnModuleInit {
     get testDbUser(): string;
     get testDbPassword(): string;
     get testDbName(): string;
+    get heliosApiKey(): string;
 }

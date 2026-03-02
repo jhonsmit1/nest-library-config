@@ -164,4 +164,8 @@ export class AppConfigService implements OnModuleInit {
         return this.getOrThrow<string>("TEST_DB_NAME");
     }
 
+    get heliosApiKey(): string {
+        return this.getOrThrow<string>("HELIOS_API_KEY");
+    }
+
 }

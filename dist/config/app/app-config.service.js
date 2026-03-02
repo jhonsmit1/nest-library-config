@@ -130,6 +130,9 @@ let AppConfigService = class AppConfigService {
     get testDbName() {
         return this.getOrThrow("TEST_DB_NAME");
     }
+    get heliosApiKey() {
+        return this.getOrThrow("HELIOS_API_KEY");
+    }
 };
 exports.AppConfigService = AppConfigService;
 exports.AppConfigService = AppConfigService = __decorate([
