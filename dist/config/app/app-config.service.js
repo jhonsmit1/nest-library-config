@@ -105,6 +105,9 @@ let AppConfigService = class AppConfigService {
         });
         return value === "true";
     }
+    get heliosApiKey() {
+        return (this.config.get("HELIOS_API_KEY", { infer: true }) || "");
+    }
 };
 exports.AppConfigService = AppConfigService;
 exports.AppConfigService = AppConfigService = __decorate([

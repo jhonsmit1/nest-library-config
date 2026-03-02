@@ -26,4 +26,5 @@ export declare class AppConfigService {
     get testDbPassword(): string;
     get testDbName(): string;
     get runMigrations(): boolean;
+    get heliosApiKey(): string;
 }
