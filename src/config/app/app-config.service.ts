@@ -148,4 +148,10 @@ export class AppConfigService {
         return value === "true";
     }
 
+    get heliosApiKey(): string {
+        return (
+            this.config.get<string>("HELIOS_API_KEY", { infer: true }) || ""
+        );
+    }
+
 }
