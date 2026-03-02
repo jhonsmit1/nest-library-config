@@ -46,6 +46,7 @@ export const envSchema = z.object({
         .string()
         .default("true")
         .describe("Enable encryption for Azure SQL connection"),
+        
     AZURE_SQL_TRUST_SERVER_CERTIFICATE: z
         .string()
         .default("false")
@@ -55,6 +56,10 @@ export const envSchema = z.object({
         .string()
         .default("false")
         .describe("Run database migrations on startup"),
+
+    HELIOS_API_KEY: z
+        .string()
+        .describe("The key used to authenticate incoming requests from Helios API"),
 
 });
 

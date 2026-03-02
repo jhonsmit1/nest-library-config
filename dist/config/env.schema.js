@@ -46,4 +46,7 @@ exports.envSchema = zod_1.z.object({
         .string()
         .default("false")
         .describe("Run database migrations on startup"),
+    HELIOS_API_KEY: zod_1.z
+        .string()
+        .describe("The key used to authenticate incoming requests from Helios API"),
 });

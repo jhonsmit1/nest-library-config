@@ -22,6 +22,7 @@ export declare const envSchema: z.ZodObject<{
     AZURE_SQL_ENCRYPT: z.ZodDefault<z.ZodString>;
     AZURE_SQL_TRUST_SERVER_CERTIFICATE: z.ZodDefault<z.ZodString>;
     RUN_MIGRATIONS: z.ZodDefault<z.ZodString>;
+    HELIOS_API_KEY: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     NODE_ENV: "development" | "test" | "production";
     PORT: string;
@@ -45,6 +46,7 @@ export declare const envSchema: z.ZodObject<{
     AZURE_SQL_ENCRYPT: string;
     AZURE_SQL_TRUST_SERVER_CERTIFICATE: string;
     RUN_MIGRATIONS: string;
+    HELIOS_API_KEY: string;
 }, {
     DB_HOST: string;
     DB_USER: string;
@@ -59,6 +61,7 @@ export declare const envSchema: z.ZodObject<{
     AZURE_SQL_DATABASE: string;
     AZURE_SQL_USER: string;
     AZURE_SQL_PASSWORD: string;
+    HELIOS_API_KEY: string;
     NODE_ENV?: "development" | "test" | "production" | undefined;
     PORT?: string | undefined;
     CORS_ALLOWED_ORIGINS?: string | undefined;
