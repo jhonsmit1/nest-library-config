@@ -1,17 +1,28 @@
+import { OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { EnvConfig } from "../env.schema";
-export declare class AppConfigService {
-    private readonly config;
-    constructor(config: ConfigService<EnvConfig>);
+import { AppConfigModuleOptions } from "./app-config.interfaces";
+export declare class AppConfigService implements OnModuleInit {
+    private readonly configService;
+    private readonly options;
+    private validatedConfig?;
+    private readonly cache;
+    constructor(configService: ConfigService, options: AppConfigModuleOptions);
+    onModuleInit(): void;
+    private validateEnvironment;
+    private resolveValue;
+    get<T = unknown>(key: string): T | undefined;
+    getOrThrow<T = unknown>(key: string): T;
     get env(): string;
-    get port(): string;
+    get port(): number;
     get corsAllowedOrigins(): string[];
     get dbHost(): string;
-    get dbPort(): string;
+    get dbPort(): number;
     get dbUser(): string;
     get dbPassword(): string;
     get dbName(): string;
     get dbMaxConnections(): number;
+    get runMigrations(): boolean;
+    get useSSL(): boolean;
     get azureSqlServer(): string;
     get azureSqlDatabase(): string;
     get azureSqlUser(): string;
@@ -19,12 +30,9 @@ export declare class AppConfigService {
     get azureSqlPort(): number;
     get azureSqlEncrypt(): boolean;
     get azureSqlTrustServerCertificate(): boolean;
-    get useSSL(): string;
     get testDbHost(): string;
-    get testDbPort(): string;
+    get testDbPort(): number;
     get testDbUser(): string;
     get testDbPassword(): string;
     get testDbName(): string;
-    get runMigrations(): boolean;
-    get heliosApiKey(): string;
 }

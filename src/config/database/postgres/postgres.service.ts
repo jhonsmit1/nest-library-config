@@ -74,10 +74,9 @@ export class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDe
                     ? this.config.testDbPassword
                     : this.config.dbPassword,
                 port: Number(isTest ? this.config.testDbPort : this.config.dbPort),
-                ssl:
-                    this.config.useSSL === "true"
-                        ? { rejectUnauthorized: false }
-                        : undefined,
+                ssl: this.config.useSSL
+                    ? { rejectUnauthorized: false }
+                    : undefined,
                 max: this.config.dbMaxConnections,
             });
 

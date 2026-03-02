@@ -8,7 +8,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CorsConfigModule = void 0;
 const common_1 = require("@nestjs/common");
-const app_config_module_1 = require("../app/app-config.module");
 const cors_config_service_1 = require("./cors.config.service");
 let CorsConfigModule = class CorsConfigModule {
 };
@@ -16,7 +15,7 @@ exports.CorsConfigModule = CorsConfigModule;
 exports.CorsConfigModule = CorsConfigModule = __decorate([
     (0, common_1.Global)(),
     (0, common_1.Module)({
-        imports: [app_config_module_1.AppConfigModule],
+        imports: [],
         providers: [cors_config_service_1.CorsConfigService],
         exports: [cors_config_service_1.CorsConfigService],
     })

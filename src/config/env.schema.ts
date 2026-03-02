@@ -2,7 +2,11 @@ import { z } from "zod";
 
 export const envSchema = z.object({
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-    PORT: z.string().default("3000"),
+    PORT: z
+        .string()
+        .default("3000")
+        .transform((val) => parseInt(val, 10))
+        .pipe(z.number()),
 
     // CORS
     CORS_ALLOWED_ORIGINS: z
@@ -15,7 +19,11 @@ export const envSchema = z.object({
 
     // Database connection details used when running the server normally
     DB_HOST: z.string(),
-    DB_PORT: z.string().default("3000"),
+    DB_PORT: z.string()
+        .default("3000")
+        .transform((val) => parseInt(val, 10))
+        .pipe(z.number()),
+        
     DB_USER: z.string(),
     DB_PASSWORD: z.string(),
     DB_NAME: z.string(),
@@ -46,7 +54,7 @@ export const envSchema = z.object({
         .string()
         .default("true")
         .describe("Enable encryption for Azure SQL connection"),
-        
+
     AZURE_SQL_TRUST_SERVER_CERTIFICATE: z
         .string()
         .default("false")

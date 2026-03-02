@@ -20,7 +20,7 @@ let CorsConfigService = class CorsConfigService {
     isOriginAllowed(origin) {
         if (!origin)
             return true;
-        const envOrigins = this.configService.corsAllowedOrigins || [];
+        const envOrigins = this.configService.corsAllowedOrigins;
         if (envOrigins.includes(origin)) {
             return true;
         }
@@ -28,7 +28,8 @@ let CorsConfigService = class CorsConfigService {
             origin.endsWith(".connectasistencia.com")) ||
             (origin.startsWith("https://") &&
                 origin.endsWith(".apps-connectassistance.com")) ||
-            (origin.startsWith("https://") && origin.endsWith(".connect.pr")) ||
+            (origin.startsWith("https://") &&
+                origin.endsWith(".connect.pr")) ||
             (this.configService.env === "development" &&
                 origin.startsWith("http://localhost"))) {
             return true;
@@ -38,12 +39,7 @@ let CorsConfigService = class CorsConfigService {
     getCorsOptions() {
         return {
             origin: (origin, callback) => {
-                if (this.isOriginAllowed(origin)) {
-                    callback(null, true);
-                }
-                else {
-                    callback(null, false);
-                }
+                callback(null, this.isOriginAllowed(origin));
             },
             methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
             allowedHeaders: [

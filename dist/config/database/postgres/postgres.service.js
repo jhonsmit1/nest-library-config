@@ -56,7 +56,7 @@ let PostgresService = PostgresService_1 = class PostgresService {
                     ? this.config.testDbPassword
                     : this.config.dbPassword,
                 port: Number(isTest ? this.config.testDbPort : this.config.dbPort),
-                ssl: this.config.useSSL === "true"
+                ssl: this.config.useSSL
                     ? { rejectUnauthorized: false }
                     : undefined,
                 max: this.config.dbMaxConnections,

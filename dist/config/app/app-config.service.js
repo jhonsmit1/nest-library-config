@@ -8,109 +8,132 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppConfigService = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
+const app_config_constants_1 = require("./app-config.constants");
 let AppConfigService = class AppConfigService {
-    config;
-    constructor(config) {
-        this.config = config;
+    configService;
+    options;
+    validatedConfig;
+    cache = new Map();
+    constructor(configService, options) {
+        this.configService = configService;
+        this.options = options;
+    }
+    onModuleInit() {
+        if (this.options.schema) {
+            this.validateEnvironment(this.options.schema);
+        }
+    }
+    validateEnvironment(schema) {
+        const result = schema.safeParse(process.env);
+        if (!result.success) {
+            console.error(result.error.format());
+            throw new Error("Invalid environment configuration");
+        }
+        this.validatedConfig = result.data;
+    }
+    resolveValue(key) {
+        if (this.validatedConfig) {
+            return this.validatedConfig[key];
+        }
+        return this.configService.get(key);
+    }
+    get(key) {
+        if (this.options.cache && this.cache.has(key)) {
+            return this.cache.get(key);
+        }
+        const value = this.resolveValue(key);
+        if (this.options.cache) {
+            this.cache.set(key, value);
+        }
+        return value;
+    }
+    getOrThrow(key) {
+        const value = this.get(key);
+        if (value === undefined) {
+            throw new Error(`Configuration key "${key}" is missing`);
+        }
+        return value;
     }
     get env() {
-        return (this.config.get("NODE_ENV", { infer: true }) ||
-            "development");
+        return this.getOrThrow("NODE_ENV");
     }
     get port() {
-        return this.config.get("PORT", { infer: true }) || "3000";
+        return this.getOrThrow("PORT");
     }
     get corsAllowedOrigins() {
-        const origins = this.config.get("CORS_ALLOWED_ORIGINS", {
-            infer: true,
-        });
-        return Array.isArray(origins) ? origins : [];
+        return this.get("CORS_ALLOWED_ORIGINS") ?? [];
     }
     get dbHost() {
-        return this.config.get("DB_HOST", { infer: true }) || "";
+        return this.getOrThrow("DB_HOST");
     }
     get dbPort() {
-        return this.config.get("DB_PORT", { infer: true }) || "5432";
+        return this.getOrThrow("DB_PORT");
     }
     get dbUser() {
-        return this.config.get("DB_USER", { infer: true }) || "";
+        return this.getOrThrow("DB_USER");
     }
     get dbPassword() {
-        return this.config.get("DB_PASSWORD", { infer: true }) || "";
+        return this.getOrThrow("DB_PASSWORD");
     }
     get dbName() {
-        return this.config.get("DB_NAME", { infer: true }) || "";
+        return this.getOrThrow("DB_NAME");
     }
     get dbMaxConnections() {
-        return (this.config.get("DB_MAX_CONNECTIONS", { infer: true }) ||
-            20);
-    }
-    get azureSqlServer() {
-        return (this.config.get("AZURE_SQL_SERVER", { infer: true }) || "");
-    }
-    get azureSqlDatabase() {
-        return (this.config.get("AZURE_SQL_DATABASE", { infer: true }) ||
-            "");
-    }
-    get azureSqlUser() {
-        return (this.config.get("AZURE_SQL_USER", { infer: true }) || "");
-    }
-    get azureSqlPassword() {
-        return (this.config.get("AZURE_SQL_PASSWORD", { infer: true }) ||
-            "");
-    }
-    get azureSqlPort() {
-        const port = this.config.get("AZURE_SQL_PORT", {
-            infer: true,
-        });
-        return port ? parseInt(port, 10) : 1433;
-    }
-    get azureSqlEncrypt() {
-        const encrypt = this.config.get("AZURE_SQL_ENCRYPT", {
-            infer: true,
-        });
-        return encrypt === "true" || encrypt === undefined;
-    }
-    get azureSqlTrustServerCertificate() {
-        const trust = this.config.get("AZURE_SQL_TRUST_SERVER_CERTIFICATE", {
-            infer: true,
-        });
-        return trust === "true";
-    }
-    get useSSL() {
-        return this.config.get("USE_SSL", { infer: true }) || "";
-    }
-    get testDbHost() {
-        return (this.config.get("TEST_DB_HOST", { infer: true }) || "");
-    }
-    get testDbPort() {
-        return (this.config.get("TEST_DB_PORT", { infer: true }) || "");
-    }
-    get testDbUser() {
-        return (this.config.get("TEST_DB_USER", { infer: true }) || "");
-    }
-    get testDbPassword() {
-        return (this.config.get("TEST_DB_PASSWORD", { infer: true }) || "");
-    }
-    get testDbName() {
-        return (this.config.get("TEST_DB_NAME", { infer: true }) || "");
+        return this.getOrThrow("DB_MAX_CONNECTIONS");
     }
     get runMigrations() {
-        const value = this.config.get("RUN_MIGRATIONS", {
-            infer: true,
-        });
-        return value === "true";
+        return this.get("RUN_MIGRATIONS") ?? false;
     }
-    get heliosApiKey() {
-        return (this.config.get("HELIOS_API_KEY", { infer: true }) || "");
+    get useSSL() {
+        return this.get("USE_SSL") ?? false;
+    }
+    get azureSqlServer() {
+        return this.getOrThrow("AZURE_SQL_SERVER");
+    }
+    get azureSqlDatabase() {
+        return this.getOrThrow("AZURE_SQL_DATABASE");
+    }
+    get azureSqlUser() {
+        return this.getOrThrow("AZURE_SQL_USER");
+    }
+    get azureSqlPassword() {
+        return this.getOrThrow("AZURE_SQL_PASSWORD");
+    }
+    get azureSqlPort() {
+        return Number(this.getOrThrow("AZURE_SQL_PORT"));
+    }
+    get azureSqlEncrypt() {
+        return this.get("AZURE_SQL_ENCRYPT") === "true";
+    }
+    get azureSqlTrustServerCertificate() {
+        return this.get("AZURE_SQL_TRUST_SERVER_CERTIFICATE") === "true";
+    }
+    get testDbHost() {
+        return this.getOrThrow("TEST_DB_HOST");
+    }
+    get testDbPort() {
+        return Number(this.getOrThrow("TEST_DB_PORT"));
+    }
+    get testDbUser() {
+        return this.getOrThrow("TEST_DB_USER");
+    }
+    get testDbPassword() {
+        return this.getOrThrow("TEST_DB_PASSWORD");
+    }
+    get testDbName() {
+        return this.getOrThrow("TEST_DB_NAME");
     }
 };
 exports.AppConfigService = AppConfigService;
 exports.AppConfigService = AppConfigService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [config_1.ConfigService])
+    __param(1, (0, common_1.Inject)(app_config_constants_1.APP_CONFIG_OPTIONS)),
+    __metadata("design:paramtypes", [config_1.ConfigService, Object])
 ], AppConfigService);

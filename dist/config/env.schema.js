@@ -4,14 +4,21 @@ exports.envSchema = void 0;
 const zod_1 = require("zod");
 exports.envSchema = zod_1.z.object({
     NODE_ENV: zod_1.z.enum(["development", "test", "production"]).default("development"),
-    PORT: zod_1.z.string().default("3000"),
+    PORT: zod_1.z
+        .string()
+        .default("3000")
+        .transform((val) => parseInt(val, 10))
+        .pipe(zod_1.z.number()),
     CORS_ALLOWED_ORIGINS: zod_1.z
         .string()
         .optional()
         .describe("Comma-separated list of allowed CORS origins")
         .transform((val) => (val ? val.split(",").map((s) => s.trim()) : [])),
     DB_HOST: zod_1.z.string(),
-    DB_PORT: zod_1.z.string().default("3000"),
+    DB_PORT: zod_1.z.string()
+        .default("3000")
+        .transform((val) => parseInt(val, 10))
+        .pipe(zod_1.z.number()),
     DB_USER: zod_1.z.string(),
     DB_PASSWORD: zod_1.z.string(),
     DB_NAME: zod_1.z.string(),

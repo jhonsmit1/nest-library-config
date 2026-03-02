@@ -9,12 +9,29 @@ var AppConfigModule_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppConfigModule = void 0;
 const common_1 = require("@nestjs/common");
+const app_config_constants_1 = require("./app-config.constants");
 const app_config_service_1 = require("./app-config.service");
 let AppConfigModule = AppConfigModule_1 = class AppConfigModule {
-    static forRoot() {
+    static forRoot(options = {}) {
+        const optionsProvider = {
+            provide: app_config_constants_1.APP_CONFIG_OPTIONS,
+            useValue: options,
+        };
         return {
             module: AppConfigModule_1,
-            providers: [app_config_service_1.AppConfigService],
+            providers: [optionsProvider, app_config_service_1.AppConfigService],
+            exports: [app_config_service_1.AppConfigService],
+        };
+    }
+    static forRootAsync(options) {
+        const optionsProvider = {
+            provide: app_config_constants_1.APP_CONFIG_OPTIONS,
+            useFactory: options.useFactory,
+            inject: options.inject ?? [],
+        };
+        return {
+            module: AppConfigModule_1,
+            providers: [optionsProvider, app_config_service_1.AppConfigService],
             exports: [app_config_service_1.AppConfigService],
         };
     }

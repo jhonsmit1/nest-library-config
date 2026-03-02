@@ -4,12 +4,12 @@ import { AppConfigService } from "../app/app-config.service";
 
 @Injectable()
 export class CorsConfigService {
-  constructor(private readonly configService: AppConfigService) {}
+  constructor(private readonly configService: AppConfigService) { }
 
   isOriginAllowed(origin: string | undefined): boolean {
     if (!origin) return true;
 
-    const envOrigins = this.configService.corsAllowedOrigins || [];
+    const envOrigins = this.configService.corsAllowedOrigins;
 
     if (envOrigins.includes(origin)) {
       return true;
@@ -20,7 +20,8 @@ export class CorsConfigService {
         origin.endsWith(".connectasistencia.com")) ||
       (origin.startsWith("https://") &&
         origin.endsWith(".apps-connectassistance.com")) ||
-      (origin.startsWith("https://") && origin.endsWith(".connect.pr")) ||
+      (origin.startsWith("https://") &&
+        origin.endsWith(".connect.pr")) ||
       (this.configService.env === "development" &&
         origin.startsWith("http://localhost"))
     ) {
@@ -30,20 +31,10 @@ export class CorsConfigService {
     return false;
   }
 
-  /**
-   * Returns full CORS config ready to be used in app.enableCors()
-   */
   getCorsOptions(): CorsOptions {
     return {
-      origin: (
-        origin: string | undefined,
-        callback: (err: Error | null, allow?: boolean) => void
-      ) => {
-        if (this.isOriginAllowed(origin)) {
-          callback(null, true);
-        } else {
-          callback(null, false);
-        }
+      origin: (origin, callback) => {
+        callback(null, this.isOriginAllowed(origin));
       },
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
       allowedHeaders: [
