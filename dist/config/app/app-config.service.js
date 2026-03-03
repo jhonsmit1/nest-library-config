@@ -152,6 +152,12 @@ let AppConfigService = class AppConfigService {
     get logLevel() {
         return this.getOrThrow("LOG_LEVEL");
     }
+    get sicCognitoUserPoolId() {
+        return this.getOrThrow("SIC_COGNITO_USER_POOL_ID");
+    }
+    get heliosWebCognitoUserPoolId() {
+        return this.getOrThrow("HELIOS_WEB_COGNITO_USER_POOL_ID");
+    }
 };
 exports.AppConfigService = AppConfigService;
 exports.AppConfigService = AppConfigService = __decorate([

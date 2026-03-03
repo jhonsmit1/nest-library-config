@@ -72,4 +72,10 @@ exports.envSchema = zod_1.z.object({
     LOG_LEVEL: zod_1.z
         .enum(["error", "warn", "info", "http", "verbose", "debug", "silly"])
         .default("debug"),
+    SIC_COGNITO_USER_POOL_ID: zod_1.z
+        .string()
+        .describe("The Cognito User Pool ID for the SIC application"),
+    HELIOS_WEB_COGNITO_USER_POOL_ID: zod_1.z
+        .string()
+        .describe("The Cognito User Pool ID for the Helios web application"),
 });

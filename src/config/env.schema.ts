@@ -89,6 +89,13 @@ export const envSchema = z.object({
         .enum(["error", "warn", "info", "http", "verbose", "debug", "silly"])
         .default("debug"),
 
+    SIC_COGNITO_USER_POOL_ID: z
+        .string()
+        .describe("The Cognito User Pool ID for the SIC application"),
+    HELIOS_WEB_COGNITO_USER_POOL_ID: z
+        .string()
+        .describe("The Cognito User Pool ID for the Helios web application"),
+
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

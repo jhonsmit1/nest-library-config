@@ -41,4 +41,6 @@ export declare class AppConfigService {
     get cloudwatchLogGroup(): string | undefined;
     get cloudwatchLogStream(): string | undefined;
     get logLevel(): "error" | "warn" | "info" | "http" | "verbose" | "debug" | "silly";
+    get sicCognitoUserPoolId(): string;
+    get heliosWebCognitoUserPoolId(): string;
 }

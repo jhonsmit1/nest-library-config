@@ -30,6 +30,8 @@ export declare const envSchema: z.ZodObject<{
     CLOUDWATCH_LOG_GROUP: z.ZodOptional<z.ZodString>;
     CLOUDWATCH_LOG_STREAM: z.ZodOptional<z.ZodString>;
     LOG_LEVEL: z.ZodDefault<z.ZodEnum<["error", "warn", "info", "http", "verbose", "debug", "silly"]>>;
+    SIC_COGNITO_USER_POOL_ID: z.ZodString;
+    HELIOS_WEB_COGNITO_USER_POOL_ID: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     NODE_ENV: "development" | "test" | "production";
     PORT: number;
@@ -55,6 +57,8 @@ export declare const envSchema: z.ZodObject<{
     TEST_DB_NAME: string;
     HELIOS_API_KEY: string;
     LOG_LEVEL: "error" | "warn" | "info" | "http" | "verbose" | "debug" | "silly";
+    SIC_COGNITO_USER_POOL_ID: string;
+    HELIOS_WEB_COGNITO_USER_POOL_ID: string;
     LOKI_ENDPOINT?: string | undefined;
     LOKI_USERNAME?: string | undefined;
     LOKI_PASSWORD?: string | undefined;
@@ -76,6 +80,8 @@ export declare const envSchema: z.ZodObject<{
     TEST_DB_PASSWORD: string;
     TEST_DB_NAME: string;
     HELIOS_API_KEY: string;
+    SIC_COGNITO_USER_POOL_ID: string;
+    HELIOS_WEB_COGNITO_USER_POOL_ID: string;
     NODE_ENV?: "development" | "test" | "production" | undefined;
     PORT?: string | undefined;
     CORS_ALLOWED_ORIGINS?: string | undefined;
