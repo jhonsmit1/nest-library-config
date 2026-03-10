@@ -9,3 +9,6 @@ export * from "./config/database/database.client";
 export * from "./config/database/database.tokens";
 export * from "./config/database/database.metrics.token";
 export * from "./config/database/postgres/postgres.types";
+export * from "./config/database/postgres/postgres.service";
+export * from "./config/database/azure-sql/azure-sql.service";
+export * from "./config/database/decorators/inject-database.decorator";

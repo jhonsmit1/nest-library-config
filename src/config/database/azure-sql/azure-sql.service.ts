@@ -10,9 +10,10 @@ import knex, { Knex } from "knex";
 import { AppConfigService } from "../../app/app-config.service";
 import { DatabaseMetrics } from "../database.metrics";
 import { DATABASE_METRICS } from "../database.metrics.token";
+import { DatabaseClient } from "../database.client";
 
 @Injectable()
-export class AzureSqlService implements OnModuleInit, OnModuleDestroy {
+export class AzureSqlService implements DatabaseClient, OnModuleInit, OnModuleDestroy {
     private readonly logger = new Logger(AzureSqlService.name);
     private knexInstance: Knex | null = null;
 
@@ -152,6 +153,44 @@ export class AzureSqlService implements OnModuleInit, OnModuleDestroy {
                 success: false,
                 error: error.message,
             };
+        }
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                               Transactions                                 */
+    /* -------------------------------------------------------------------------- */
+
+    async withTransaction<T>(
+        fn: (tx: Knex.Transaction) => Promise<T>
+    ): Promise<T> {
+
+        if (!this.knexInstance) {
+            throw new Error("Azure SQL not connected");
+        }
+
+        const start = Date.now();
+
+        try {
+
+            const result = await this.knexInstance.transaction(async (trx) => {
+                return fn(trx);
+            });
+
+            const duration = (Date.now() - start) / 1000;
+
+            this.metrics?.recordAzureSqlQuery(
+                "transaction",
+                duration,
+                this.config.azureSqlDatabase
+            );
+
+            return result;
+
+        } catch (error) {
+
+            this.logger.error("Azure SQL transaction failed", error);
+            throw error;
+
         }
     }
 

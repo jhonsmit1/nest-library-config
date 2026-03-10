@@ -118,6 +118,24 @@ let AzureSqlService = AzureSqlService_1 = class AzureSqlService {
             };
         }
     }
+    async withTransaction(fn) {
+        if (!this.knexInstance) {
+            throw new Error("Azure SQL not connected");
+        }
+        const start = Date.now();
+        try {
+            const result = await this.knexInstance.transaction(async (trx) => {
+                return fn(trx);
+            });
+            const duration = (Date.now() - start) / 1000;
+            this.metrics?.recordAzureSqlQuery("transaction", duration, this.config.azureSqlDatabase);
+            return result;
+        }
+        catch (error) {
+            this.logger.error("Azure SQL transaction failed", error);
+            throw error;
+        }
+    }
     isConfigured() {
         return !!(this.config.azureSqlServer &&
             this.config.azureSqlDatabase &&

@@ -25,3 +25,6 @@ __exportStar(require("./config/database/database.client"), exports);
 __exportStar(require("./config/database/database.tokens"), exports);
 __exportStar(require("./config/database/database.metrics.token"), exports);
 __exportStar(require("./config/database/postgres/postgres.types"), exports);
+__exportStar(require("./config/database/postgres/postgres.service"), exports);
+__exportStar(require("./config/database/azure-sql/azure-sql.service"), exports);
+__exportStar(require("./config/database/decorators/inject-database.decorator"), exports);
