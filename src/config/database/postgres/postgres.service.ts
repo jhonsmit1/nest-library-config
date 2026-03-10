@@ -10,15 +10,20 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Pool } from "pg";
 import { sql } from "drizzle-orm";
+
 import { AppConfigService } from "../../app/app-config.service";
 import { DrizzleDb } from "./postgres.types";
 import { DatabaseClient } from "../database.client";
+
 import { DATABASE_METRICS } from "../database.metrics.token";
 import { DatabaseMetrics } from "../database.metrics";
+
 import { DATABASE_SCHEMA } from "../database.schema.token";
 
 @Injectable()
-export class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDestroy {
+export class PostgresService
+    implements DatabaseClient, OnModuleInit, OnModuleDestroy {
+
     private readonly logger = new Logger(PostgresService.name);
 
     private pool: Pool | null = null;
@@ -26,20 +31,15 @@ export class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDe
 
     constructor(
         private readonly config: AppConfigService,
+
         @Optional()
         @Inject(DATABASE_METRICS)
         private readonly metrics?: DatabaseMetrics,
-        /**
-         * El schema es CONFIGURACION del modulo,
-         * no algo que se pase dinamicamente en runtime
-         */
+
         @Optional()
         @Inject(DATABASE_SCHEMA)
         private readonly schema?: Record<string, unknown>
-    ) {
-        console.log("Metrics injected?", !!this.metrics);
-
-    }
+    ) {}
 
     /* -------------------------------------------------------------------------- */
     /*                               Lifecycle                                    */
@@ -58,6 +58,7 @@ export class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDe
     /* -------------------------------------------------------------------------- */
 
     private async connect(): Promise<void> {
+
         if (this.db) {
             this.logger.warn("Postgres already connected. Skipping connect().");
             return;
@@ -66,6 +67,7 @@ export class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDe
         const isTest = this.config.env === "test";
 
         try {
+
             this.pool = new Pool({
                 user: isTest ? this.config.testDbUser : this.config.dbUser,
                 host: isTest ? this.config.testDbHost : this.config.dbHost,
@@ -92,35 +94,42 @@ export class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDe
                 schema: this.schema,
             });
 
-            /**
-             * Migrations: solo si explícitamente se permite
-             * y nunca en producción
-             */
             if (this.config.runMigrations && this.config.env !== "production") {
                 await migrate(this.db, { migrationsFolder: "drizzle" });
                 this.logger.log("Postgres migrations executed");
             }
 
             this.logger.log("PostgreSQL connected successfully");
+
         } catch (error) {
+
             this.logger.error("Failed to connect to PostgreSQL", error);
+
             this.pool = null;
             this.db = null;
-            throw error; // fail fast
+
+            throw error;
         }
     }
 
     private async disconnect(): Promise<void> {
+
         if (!this.pool) return;
 
         try {
+
             await this.pool.end();
             this.logger.log("PostgreSQL disconnected");
+
         } catch (error) {
+
             this.logger.error("Error disconnecting PostgreSQL", error);
+
         } finally {
+
             this.pool = null;
             this.db = null;
+
         }
     }
 
@@ -128,10 +137,14 @@ export class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDe
     /*                               Public API                                   */
     /* -------------------------------------------------------------------------- */
 
-    getDb<TSchema extends Record<string, unknown> = Record<string, unknown>>(): DrizzleDb<TSchema> {
+    getDb<
+        TSchema extends Record<string, unknown> = Record<string, unknown>
+    >(): DrizzleDb<TSchema> {
+
         if (!this.db) {
             throw new Error("Postgres not connected");
         }
+
         return this.db as DrizzleDb<TSchema>;
     }
 
@@ -148,17 +161,15 @@ export class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDe
         TSchema extends Record<string, unknown> = Record<string, unknown>
     >(fn: (tx: DrizzleDb<TSchema>) => Promise<T>): Promise<T> {
 
-        console.log("withTransaction called");
-
         const db = this.getDb<TSchema>();
+
         const start = Date.now();
 
         try {
+
             const result = await db.transaction(fn);
 
             const duration = (Date.now() - start) / 1000;
-
-            console.log("Transaction finished, duration:", duration);
 
             this.metrics?.recordPostgresQuery(
                 "transaction",
@@ -167,12 +178,14 @@ export class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDe
             );
 
             return result;
+
         } catch (error) {
-            console.log("Transaction failed");
+
+            this.logger.error("Transaction failed", error);
             throw error;
+
         }
     }
-
 
     /* -------------------------------------------------------------------------- */
     /*                               Health check                                 */
@@ -183,6 +196,7 @@ export class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDe
         duration?: number;
         error?: string;
     }> {
+
         if (!this.isConnected()) {
             return { success: false, error: "Postgres not connected" };
         }
@@ -190,7 +204,10 @@ export class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDe
         const start = Date.now();
 
         try {
-            await this.getDb().execute(
+
+            const db = this.getDb();
+
+            await db.execute(
                 sql`SELECT current_database(), now();`
             );
 
@@ -203,11 +220,14 @@ export class PostgresService implements DatabaseClient, OnModuleInit, OnModuleDe
             );
 
             return { success: true, duration };
+
         } catch (error: any) {
+
             return {
                 success: false,
                 error: error.message,
             };
+
         }
     }
 }

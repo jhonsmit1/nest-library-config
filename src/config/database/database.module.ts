@@ -41,17 +41,27 @@ export class DatabaseModule {
 
     if (options.postgres) {
 
-      providers.push(
+      /**
+       * Schema opcional
+       */
 
-        {
+      if (options.schema) {
+        providers.push({
           provide: DATABASE_SCHEMA,
           useValue: options.schema,
-        },
+        });
+      }
+
+      providers.push(
+
+        /**
+         * Servicio principal
+         */
 
         PostgresService,
 
         /**
-         * Servicio postgres
+         * Alias del servicio
          */
 
         {
@@ -60,7 +70,7 @@ export class DatabaseModule {
         },
 
         /**
-         * Cliente drizzle
+         * Cliente Drizzle
          */
 
         {
@@ -87,10 +97,14 @@ export class DatabaseModule {
 
       providers.push(
 
+        /**
+         * Servicio Azure
+         */
+
         AzureSqlService,
 
         /**
-         * Servicio azure
+         * Alias del servicio
          */
 
         {
@@ -99,7 +113,7 @@ export class DatabaseModule {
         },
 
         /**
-         * Cliente knex
+         * Cliente Knex
          */
 
         {

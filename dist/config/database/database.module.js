@@ -21,10 +21,13 @@ let DatabaseModule = DatabaseModule_1 = class DatabaseModule {
             providers.push(options.metricsProvider);
         }
         if (options.postgres) {
-            providers.push({
-                provide: database_schema_token_1.DATABASE_SCHEMA,
-                useValue: options.schema,
-            }, postgres_service_1.PostgresService, {
+            if (options.schema) {
+                providers.push({
+                    provide: database_schema_token_1.DATABASE_SCHEMA,
+                    useValue: options.schema,
+                });
+            }
+            providers.push(postgres_service_1.PostgresService, {
                 provide: database_tokens_1.POSTGRES_DB,
                 useExisting: postgres_service_1.PostgresService,
             }, {

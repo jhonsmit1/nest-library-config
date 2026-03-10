@@ -33,7 +33,6 @@ let PostgresService = PostgresService_1 = class PostgresService {
         this.config = config;
         this.metrics = metrics;
         this.schema = schema;
-        console.log("Metrics injected?", !!this.metrics);
     }
     async onModuleInit() {
         await this.connect();
@@ -108,18 +107,16 @@ let PostgresService = PostgresService_1 = class PostgresService {
         return !!this.db && !!this.pool;
     }
     async withTransaction(fn) {
-        console.log("withTransaction called");
         const db = this.getDb();
         const start = Date.now();
         try {
             const result = await db.transaction(fn);
             const duration = (Date.now() - start) / 1000;
-            console.log("Transaction finished, duration:", duration);
             this.metrics?.recordPostgresQuery("transaction", duration, this.config.dbName);
             return result;
         }
         catch (error) {
-            console.log("Transaction failed");
+            this.logger.error("Transaction failed", error);
             throw error;
         }
     }
@@ -129,7 +126,8 @@ let PostgresService = PostgresService_1 = class PostgresService {
         }
         const start = Date.now();
         try {
-            await this.getDb().execute((0, drizzle_orm_1.sql) `SELECT current_database(), now();`);
+            const db = this.getDb();
+            await db.execute((0, drizzle_orm_1.sql) `SELECT current_database(), now();`);
             const duration = Date.now() - start;
             this.metrics?.recordPostgresQuery("healthcheck", duration / 1000, this.config.dbName);
             return { success: true, duration };
