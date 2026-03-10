@@ -32,7 +32,17 @@ let DatabaseModule = DatabaseModule_1 = class DatabaseModule {
                 useExisting: postgres_service_1.PostgresService,
             }, {
                 provide: database_tokens_1.POSTGRES_DRIZZLE,
-                useFactory: (postgres) => postgres.getDb(),
+                useFactory: (postgres) => {
+                    let db;
+                    return new Proxy({}, {
+                        get(_, prop) {
+                            if (!db) {
+                                db = postgres.getDb();
+                            }
+                            return db[prop];
+                        },
+                    });
+                },
                 inject: [postgres_service_1.PostgresService],
             });
             exports.push(database_tokens_1.POSTGRES_DB, database_tokens_1.POSTGRES_DRIZZLE, postgres_service_1.PostgresService);
@@ -43,7 +53,17 @@ let DatabaseModule = DatabaseModule_1 = class DatabaseModule {
                 useExisting: azure_sql_service_1.AzureSqlService,
             }, {
                 provide: database_tokens_1.AZURE_SQL_KNEX,
-                useFactory: (azure) => azure.getKnex(),
+                useFactory: (azure) => {
+                    let knex;
+                    return new Proxy({}, {
+                        get(_, prop) {
+                            if (!knex) {
+                                knex = azure.getKnex();
+                            }
+                            return knex[prop];
+                        },
+                    });
+                },
                 inject: [azure_sql_service_1.AzureSqlService],
             });
             exports.push(database_tokens_1.AZURE_SQL_DB, database_tokens_1.AZURE_SQL_KNEX, azure_sql_service_1.AzureSqlService);

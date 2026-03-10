@@ -41,10 +41,6 @@ export class DatabaseModule {
 
     if (options.postgres) {
 
-      /**
-       * Schema opcional
-       */
-
       if (options.schema) {
         providers.push({
           provide: DATABASE_SCHEMA,
@@ -53,11 +49,6 @@ export class DatabaseModule {
       }
 
       providers.push(
-
-        /**
-         * Servicio principal
-         */
-
         PostgresService,
 
         /**
@@ -70,15 +61,33 @@ export class DatabaseModule {
         },
 
         /**
-         * Cliente Drizzle
+         * Proxy lazy para Drizzle
          */
 
         {
           provide: POSTGRES_DRIZZLE,
-          useFactory: (postgres: PostgresService) => postgres.getDb(),
+          useFactory: (postgres: PostgresService) => {
+
+            let db: any;
+
+            return new Proxy(
+              {},
+              {
+                get(_, prop) {
+
+                  if (!db) {
+                    db = postgres.getDb();
+                  }
+
+                  return db[prop];
+
+                },
+              }
+            );
+
+          },
           inject: [PostgresService],
         }
-
       );
 
       exports.push(
@@ -86,7 +95,6 @@ export class DatabaseModule {
         POSTGRES_DRIZZLE,
         PostgresService
       );
-
     }
 
     /**
@@ -96,10 +104,6 @@ export class DatabaseModule {
     if (options.azureSql) {
 
       providers.push(
-
-        /**
-         * Servicio Azure
-         */
 
         AzureSqlService,
 
@@ -113,12 +117,31 @@ export class DatabaseModule {
         },
 
         /**
-         * Cliente Knex
+         * Proxy lazy para Knex
          */
 
         {
           provide: AZURE_SQL_KNEX,
-          useFactory: (azure: AzureSqlService) => azure.getKnex(),
+          useFactory: (azure: AzureSqlService) => {
+
+            let knex: any;
+
+            return new Proxy(
+              {},
+              {
+                get(_, prop) {
+
+                  if (!knex) {
+                    knex = azure.getKnex();
+                  }
+
+                  return knex[prop];
+
+                },
+              }
+            );
+
+          },
           inject: [AzureSqlService],
         }
 
@@ -129,7 +152,6 @@ export class DatabaseModule {
         AZURE_SQL_KNEX,
         AzureSqlService
       );
-
     }
 
     return {
