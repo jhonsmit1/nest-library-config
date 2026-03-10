@@ -22,6 +22,11 @@ exports.envSchema = zod_1.z.object({
     DB_USER: zod_1.z.string(),
     DB_PASSWORD: zod_1.z.string(),
     DB_NAME: zod_1.z.string(),
+    USE_SSL: zod_1.z
+        .string()
+        .default("false")
+        .transform((val) => val === "true")
+        .describe("Enable SSL for PostgreSQL connection"),
     DB_MAX_CONNECTIONS: zod_1.z
         .string()
         .default("20")

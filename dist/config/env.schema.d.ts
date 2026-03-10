@@ -8,6 +8,7 @@ export declare const envSchema: z.ZodObject<{
     DB_USER: z.ZodString;
     DB_PASSWORD: z.ZodString;
     DB_NAME: z.ZodString;
+    USE_SSL: z.ZodEffects<z.ZodDefault<z.ZodString>, boolean, string | undefined>;
     DB_MAX_CONNECTIONS: z.ZodPipeline<z.ZodEffects<z.ZodDefault<z.ZodString>, number, string | undefined>, z.ZodNumber>;
     TEST_DB_HOST: z.ZodString;
     TEST_DB_PORT: z.ZodString;
@@ -43,6 +44,7 @@ export declare const envSchema: z.ZodObject<{
     DB_NAME: string;
     DB_MAX_CONNECTIONS: number;
     RUN_MIGRATIONS: string;
+    USE_SSL: boolean;
     AZURE_SQL_SERVER: string;
     AZURE_SQL_DATABASE: string;
     AZURE_SQL_USER: string;
@@ -88,6 +90,7 @@ export declare const envSchema: z.ZodObject<{
     DB_PORT?: string | undefined;
     DB_MAX_CONNECTIONS?: string | undefined;
     RUN_MIGRATIONS?: string | undefined;
+    USE_SSL?: string | undefined;
     AZURE_SQL_PORT?: string | undefined;
     AZURE_SQL_ENCRYPT?: string | undefined;
     AZURE_SQL_TRUST_SERVER_CERTIFICATE?: string | undefined;

@@ -27,6 +27,11 @@ export const envSchema = z.object({
     DB_USER: z.string(),
     DB_PASSWORD: z.string(),
     DB_NAME: z.string(),
+    USE_SSL: z
+        .string()
+        .default("false")
+        .transform((val) => val === "true")
+        .describe("Enable SSL for PostgreSQL connection"),
     DB_MAX_CONNECTIONS: z
         .string()
         .default("20")
@@ -95,6 +100,7 @@ export const envSchema = z.object({
     HELIOS_WEB_COGNITO_USER_POOL_ID: z
         .string()
         .describe("The Cognito User Pool ID for the Helios web application"),
+
 
 });
 
