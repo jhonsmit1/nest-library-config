@@ -8,6 +8,7 @@ import { POSTGRES_DB, AZURE_SQL_DB } from "./database.tokens";
 @Global()
 @Module({})
 export class DatabaseModule {
+
   static forRoot<TSchema extends Record<string, unknown>>(
     options: DatabaseModuleOptions & {
       schema?: TSchema;
@@ -16,10 +17,12 @@ export class DatabaseModule {
   ): DynamicModule {
 
     const providers: Provider[] = [];
+    const exports: Array<Provider | string | symbol> = [];
 
     /**
      * Metrics provider opcional
      */
+
     if (options.metricsProvider) {
       providers.push(options.metricsProvider);
     }
@@ -27,6 +30,7 @@ export class DatabaseModule {
     /**
      * POSTGRES
      */
+
     if (options.postgres) {
 
       providers.push(
@@ -41,6 +45,11 @@ export class DatabaseModule {
           provide: POSTGRES_DB,
           useExisting: PostgresService,
         }
+      );
+
+      exports.push(
+        POSTGRES_DB,
+        PostgresService
       );
 
     }
@@ -60,17 +69,19 @@ export class DatabaseModule {
         }
       );
 
+      exports.push(
+        AZURE_SQL_DB,
+        AzureSqlService
+      );
+
     }
 
     return {
       module: DatabaseModule,
       providers,
-      exports: [
-        POSTGRES_DB,
-        AZURE_SQL_DB,
-        PostgresService,
-        AzureSqlService
-      ],
+      exports,
     };
+
   }
+
 }
