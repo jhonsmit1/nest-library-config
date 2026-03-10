@@ -64,6 +64,7 @@ export class DatabaseModule {
          * Proxy lazy para Drizzle
          */
 
+
         {
           provide: POSTGRES_DRIZZLE,
           useFactory: (postgres: PostgresService) => {
@@ -75,12 +76,26 @@ export class DatabaseModule {
               {
                 get(_, prop) {
 
+                  /**
+                   * NestJS inspecciona propiedades internas
+                   * NO debemos inicializar la DB aquí
+                   */
+
+                  if (
+                    prop === "constructor" ||
+                    prop === "then" ||
+                    prop === "inspect" ||
+                    prop === Symbol.toStringTag ||
+                    prop === Symbol.iterator
+                  ) {
+                    return undefined;
+                  }
+
                   if (!db) {
                     db = postgres.getDb();
                   }
 
                   return db[prop];
-
                 },
               }
             );
@@ -131,12 +146,21 @@ export class DatabaseModule {
               {
                 get(_, prop) {
 
+                  if (
+                    prop === "constructor" ||
+                    prop === "then" ||
+                    prop === "inspect" ||
+                    prop === Symbol.toStringTag ||
+                    prop === Symbol.iterator
+                  ) {
+                    return undefined;
+                  }
+
                   if (!knex) {
                     knex = azure.getKnex();
                   }
 
                   return knex[prop];
-
                 },
               }
             );

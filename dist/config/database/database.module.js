@@ -36,6 +36,13 @@ let DatabaseModule = DatabaseModule_1 = class DatabaseModule {
                     let db;
                     return new Proxy({}, {
                         get(_, prop) {
+                            if (prop === "constructor" ||
+                                prop === "then" ||
+                                prop === "inspect" ||
+                                prop === Symbol.toStringTag ||
+                                prop === Symbol.iterator) {
+                                return undefined;
+                            }
                             if (!db) {
                                 db = postgres.getDb();
                             }
@@ -57,6 +64,13 @@ let DatabaseModule = DatabaseModule_1 = class DatabaseModule {
                     let knex;
                     return new Proxy({}, {
                         get(_, prop) {
+                            if (prop === "constructor" ||
+                                prop === "then" ||
+                                prop === "inspect" ||
+                                prop === Symbol.toStringTag ||
+                                prop === Symbol.iterator) {
+                                return undefined;
+                            }
                             if (!knex) {
                                 knex = azure.getKnex();
                             }
