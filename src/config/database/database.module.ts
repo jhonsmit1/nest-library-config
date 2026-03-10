@@ -1,9 +1,17 @@
 import { DynamicModule, Global, Module, Provider } from "@nestjs/common";
 import { DatabaseModuleOptions } from "./database.options";
+
 import { PostgresService } from "./postgres/postgres.service";
 import { AzureSqlService } from "./azure-sql/azure-sql.service";
+
 import { DATABASE_SCHEMA } from "./database.schema.token";
-import { POSTGRES_DB, AZURE_SQL_DB } from "./database.tokens";
+
+import {
+  POSTGRES_DB,
+  AZURE_SQL_DB,
+  POSTGRES_DRIZZLE,
+  AZURE_SQL_KNEX,
+} from "./database.tokens";
 
 @Global()
 @Module({})
@@ -34,6 +42,7 @@ export class DatabaseModule {
     if (options.postgres) {
 
       providers.push(
+
         {
           provide: DATABASE_SCHEMA,
           useValue: options.schema,
@@ -41,14 +50,30 @@ export class DatabaseModule {
 
         PostgresService,
 
+        /**
+         * Servicio postgres
+         */
+
         {
           provide: POSTGRES_DB,
           useExisting: PostgresService,
+        },
+
+        /**
+         * Cliente drizzle
+         */
+
+        {
+          provide: POSTGRES_DRIZZLE,
+          useFactory: (postgres: PostgresService) => postgres.getDb(),
+          inject: [PostgresService],
         }
+
       );
 
       exports.push(
         POSTGRES_DB,
+        POSTGRES_DRIZZLE,
         PostgresService
       );
 
@@ -61,16 +86,33 @@ export class DatabaseModule {
     if (options.azureSql) {
 
       providers.push(
+
         AzureSqlService,
+
+        /**
+         * Servicio azure
+         */
 
         {
           provide: AZURE_SQL_DB,
           useExisting: AzureSqlService,
+        },
+
+        /**
+         * Cliente knex
+         */
+
+        {
+          provide: AZURE_SQL_KNEX,
+          useFactory: (azure: AzureSqlService) => azure.getKnex(),
+          inject: [AzureSqlService],
         }
+
       );
 
       exports.push(
         AZURE_SQL_DB,
+        AZURE_SQL_KNEX,
         AzureSqlService
       );
 
