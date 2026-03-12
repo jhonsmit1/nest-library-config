@@ -141,34 +141,45 @@ export class DatabaseModule {
 
             let knex: any;
 
-            return new Proxy(
-              {},
-              {
-                get(_, prop) {
+            const handler: ProxyHandler<any> = {
 
-                  if (
-                    prop === "constructor" ||
-                    prop === "then" ||
-                    prop === "inspect" ||
-                    prop === Symbol.toStringTag ||
-                    prop === Symbol.iterator
-                  ) {
-                    return undefined;
-                  }
+              apply(_, __, args) {
 
-                  if (!knex) {
-                    knex = azure.getKnex();
-                  }
+                if (!knex) {
+                  knex = azure.getKnex();
+                }
 
-                  return knex[prop];
-                },
+                return knex(...args);
+
+              },
+
+              get(_, prop) {
+
+                if (
+                  prop === "constructor" ||
+                  prop === "then" ||
+                  prop === "inspect" ||
+                  prop === Symbol.toStringTag ||
+                  prop === Symbol.iterator
+                ) {
+                  return undefined;
+                }
+
+                if (!knex) {
+                  knex = azure.getKnex();
+                }
+
+                return knex[prop];
+
               }
-            );
+
+            };
+
+            return new Proxy(function () { }, handler);
 
           },
           inject: [AzureSqlService],
         }
-
       );
 
       exports.push(

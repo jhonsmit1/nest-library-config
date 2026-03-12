@@ -62,7 +62,13 @@ let DatabaseModule = DatabaseModule_1 = class DatabaseModule {
                 provide: database_tokens_1.AZURE_SQL_KNEX,
                 useFactory: (azure) => {
                     let knex;
-                    return new Proxy({}, {
+                    const handler = {
+                        apply(_, __, args) {
+                            if (!knex) {
+                                knex = azure.getKnex();
+                            }
+                            return knex(...args);
+                        },
                         get(_, prop) {
                             if (prop === "constructor" ||
                                 prop === "then" ||
@@ -75,8 +81,9 @@ let DatabaseModule = DatabaseModule_1 = class DatabaseModule {
                                 knex = azure.getKnex();
                             }
                             return knex[prop];
-                        },
-                    });
+                        }
+                    };
+                    return new Proxy(function () { }, handler);
                 },
                 inject: [azure_sql_service_1.AzureSqlService],
             });
