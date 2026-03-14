@@ -9,6 +9,8 @@ var DatabaseModule_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DatabaseModule = void 0;
 const common_1 = require("@nestjs/common");
+const database_transaction_manager_1 = require("./transactions/database-transaction.manager");
+const transaction_tokens_1 = require("./transactions/transaction.tokens");
 const postgres_service_1 = require("./postgres/postgres.service");
 const azure_sql_service_1 = require("./azure-sql/azure-sql.service");
 const database_schema_token_1 = require("./database.schema.token");
@@ -89,6 +91,11 @@ let DatabaseModule = DatabaseModule_1 = class DatabaseModule {
             });
             exports.push(database_tokens_1.AZURE_SQL_DB, database_tokens_1.AZURE_SQL_KNEX, azure_sql_service_1.AzureSqlService);
         }
+        providers.push({
+            provide: transaction_tokens_1.TRANSACTION_MANAGER,
+            useClass: database_transaction_manager_1.DatabaseTransactionManager,
+        });
+        exports.push(transaction_tokens_1.TRANSACTION_MANAGER);
         return {
             module: DatabaseModule_1,
             providers,

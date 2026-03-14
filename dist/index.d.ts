@@ -12,3 +12,6 @@ export * from "./config/database/postgres/postgres.types";
 export * from "./config/database/postgres/postgres.service";
 export * from "./config/database/azure-sql/azure-sql.service";
 export * from "./config/database/decorators/inject-database.decorator";
+export * from "./config/database/transactions/transaction.tokens";
+export * from "./config/database/transactions/transaction-manager.interface";
+export * from "./config/database/transactions/database-transaction.manager";

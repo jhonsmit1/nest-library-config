@@ -1,6 +1,7 @@
 import { DynamicModule, Global, Module, Provider } from "@nestjs/common";
 import { DatabaseModuleOptions } from "./database.options";
-
+import { DatabaseTransactionManager } from "./transactions/database-transaction.manager";
+import { TRANSACTION_MANAGER } from "./transactions/transaction.tokens";
 import { PostgresService } from "./postgres/postgres.service";
 import { AzureSqlService } from "./azure-sql/azure-sql.service";
 
@@ -188,6 +189,13 @@ export class DatabaseModule {
         AzureSqlService
       );
     }
+
+    providers.push({
+      provide: TRANSACTION_MANAGER,
+      useClass: DatabaseTransactionManager,
+    });
+
+    exports.push(TRANSACTION_MANAGER);
 
     return {
       module: DatabaseModule,
