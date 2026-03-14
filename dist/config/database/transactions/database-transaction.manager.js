@@ -24,10 +24,14 @@ let DatabaseTransactionManager = class DatabaseTransactionManager {
     }
     async runInTransaction(fn) {
         if (this.azure) {
-            return this.azure.withTransaction(async () => fn());
+            return this.azure.withTransaction(async (trx) => {
+                return fn(trx);
+            });
         }
         if (this.postgres) {
-            return this.postgres.withTransaction(async () => fn());
+            return this.postgres.withTransaction(async (trx) => {
+                return fn(trx);
+            });
         }
         throw new Error("No database client available for transactions");
     }
