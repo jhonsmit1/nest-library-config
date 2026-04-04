@@ -11,16 +11,19 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var AppConfigService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppConfigService = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const app_config_constants_1 = require("./app-config.constants");
-let AppConfigService = class AppConfigService {
+const common_2 = require("@nestjs/common");
+let AppConfigService = AppConfigService_1 = class AppConfigService {
     configService;
     options;
     validatedConfig;
     cache = new Map();
+    logger = new common_2.Logger(AppConfigService_1.name);
     constructor(configService, options) {
         this.configService = configService;
         this.options = options;
@@ -31,7 +34,7 @@ let AppConfigService = class AppConfigService {
     validateEnvironment(schema) {
         const result = schema.safeParse(process.env);
         if (!result.success) {
-            console.error(result.error.format());
+            this.logger.error("Invalid environment configuration", result.error.format());
             throw new Error("Invalid environment configuration");
         }
         return result.data;
@@ -55,6 +58,7 @@ let AppConfigService = class AppConfigService {
     getOrThrow(key) {
         const value = this.get(key);
         if (value === undefined) {
+            this.logger.error(`Missing configuration key: ${key}`);
             throw new Error(`Configuration key "${key}" is missing`);
         }
         return value;
@@ -111,13 +115,13 @@ let AppConfigService = class AppConfigService {
         return this.getOrThrow("AZURE_SQL_ENCRYPT");
     }
     get azureSqlTrustServerCertificate() {
-        return this.get("AZURE_SQL_TRUST_SERVER_CERTIFICATE") === "true";
+        return this.get("AZURE_SQL_TRUST_SERVER_CERTIFICATE") ?? false;
     }
     get testDbHost() {
         return this.getOrThrow("TEST_DB_HOST");
     }
     get testDbPort() {
-        return Number(this.getOrThrow("TEST_DB_PORT"));
+        return this.getOrThrow("TEST_DB_PORT");
     }
     get testDbUser() {
         return this.getOrThrow("TEST_DB_USER");
@@ -128,8 +132,11 @@ let AppConfigService = class AppConfigService {
     get testDbName() {
         return this.getOrThrow("TEST_DB_NAME");
     }
-    get heliosApiKey() {
-        return this.getOrThrow("HELIOS_API_KEY");
+    get catalogsCacheRefreshIntervalMs() {
+        return this.get("CATALOGS_CACHE_REFRESH_INTERVAL_MS") ?? 3600000;
+    }
+    get logLevel() {
+        return this.getOrThrow("LOG_LEVEL");
     }
     get lokiEndpoint() {
         return this.get("LOKI_ENDPOINT");
@@ -149,18 +156,21 @@ let AppConfigService = class AppConfigService {
     get cloudwatchLogStream() {
         return this.get("CLOUDWATCH_LOG_STREAM");
     }
-    get logLevel() {
-        return this.getOrThrow("LOG_LEVEL");
-    }
     get sicCognitoUserPoolId() {
         return this.getOrThrow("SIC_COGNITO_USER_POOL_ID");
     }
     get heliosWebCognitoUserPoolId() {
         return this.getOrThrow("HELIOS_WEB_COGNITO_USER_POOL_ID");
     }
+    get jwtSecret() {
+        return this.getOrThrow("JWT_SECRET");
+    }
+    get heliosApiKey() {
+        return this.getOrThrow("HELIOS_API_KEY");
+    }
 };
 exports.AppConfigService = AppConfigService;
-exports.AppConfigService = AppConfigService = __decorate([
+exports.AppConfigService = AppConfigService = AppConfigService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(1, (0, common_1.Inject)(app_config_constants_1.APP_CONFIG_OPTIONS)),
     __metadata("design:paramtypes", [config_1.ConfigService, Object])

@@ -1,16 +1,18 @@
 import { ConfigService } from "@nestjs/config";
 import { AppConfigModuleOptions } from "./app-config.interfaces";
+import { EnvConfig } from "../env.schema";
 export declare class AppConfigService {
     private readonly configService;
     private readonly options;
     private readonly validatedConfig?;
     private readonly cache;
+    private readonly logger;
     constructor(configService: ConfigService, options: AppConfigModuleOptions);
     private validateEnvironment;
     private resolveValue;
-    get<T = unknown>(key: string): T | undefined;
-    getOrThrow<T = unknown>(key: string): T;
-    get env(): string;
+    get<K extends keyof EnvConfig>(key: K): EnvConfig[K] | undefined;
+    getOrThrow<K extends keyof EnvConfig>(key: K): EnvConfig[K];
+    get env(): "development" | "test" | "production";
     get port(): number;
     get corsAllowedOrigins(): string[];
     get dbHost(): string;
@@ -29,18 +31,20 @@ export declare class AppConfigService {
     get azureSqlEncrypt(): boolean;
     get azureSqlTrustServerCertificate(): boolean;
     get testDbHost(): string;
-    get testDbPort(): number;
+    get testDbPort(): string;
     get testDbUser(): string;
     get testDbPassword(): string;
     get testDbName(): string;
-    get heliosApiKey(): string;
+    get catalogsCacheRefreshIntervalMs(): number;
+    get logLevel(): "error" | "warn" | "info" | "http" | "verbose" | "debug" | "silly";
     get lokiEndpoint(): string | undefined;
     get lokiUsername(): string | undefined;
     get lokiPassword(): string | undefined;
     get awsRegion(): string | undefined;
     get cloudwatchLogGroup(): string | undefined;
     get cloudwatchLogStream(): string | undefined;
-    get logLevel(): "error" | "warn" | "info" | "http" | "verbose" | "debug" | "silly";
     get sicCognitoUserPoolId(): string;
     get heliosWebCognitoUserPoolId(): string;
+    get jwtSecret(): string;
+    get heliosApiKey(): string;
 }

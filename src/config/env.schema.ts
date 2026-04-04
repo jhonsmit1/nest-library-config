@@ -8,16 +8,17 @@ export const envSchema = z.object({
         .transform((val) => parseInt(val, 10))
         .pipe(z.number()),
 
-    // CORS
+    /* ===========================
+     * CORS
+     * =========================== */
     CORS_ALLOWED_ORIGINS: z
         .string()
         .optional()
-        .describe("Comma-separated list of allowed CORS origins")
         .transform((val) => (val ? val.split(",").map((s) => s.trim()) : [])),
 
-
-
-    // Database connection details used when running the server normally
+    /* ===========================
+     * DATABASE (POSTGRES)
+     * =========================== */
     DB_HOST: z.string(),
     DB_PORT: z.string()
         .default("3000")
@@ -30,27 +31,36 @@ export const envSchema = z.object({
     USE_SSL: z
         .string()
         .default("false")
-        .transform((val) => val === "true")
-        .describe("Enable SSL for PostgreSQL connection"),
+        .transform((val) => val === "true"),
+
     DB_MAX_CONNECTIONS: z
         .string()
         .default("20")
         .transform((val) => parseInt(val, 10))
-        .pipe(z.number())
-        .describe("Maximum number of connections in the PostgreSQL pool"),
+        .pipe(z.number()),
 
-    // Test DB variables are only used when running tests when the environment is "test"
+    RUN_MIGRATIONS: z
+        .string()
+        .default("false")
+        .transform((val) => val === "true"),
+
+    /* ===========================
+    * TEST DB
+    * =========================== */
     TEST_DB_HOST: z.string(),
     TEST_DB_PORT: z.string(),
     TEST_DB_USER: z.string(),
     TEST_DB_PASSWORD: z.string(),
     TEST_DB_NAME: z.string(),
 
-    // Azure SQL Database connection (for Knex.js)
-    AZURE_SQL_SERVER: z.string().describe("Azure SQL Server hostname"),
-    AZURE_SQL_DATABASE: z.string().describe("Azure SQL Database name"),
-    AZURE_SQL_USER: z.string().describe("Azure SQL Database username"),
-    AZURE_SQL_PASSWORD: z.string().describe("Azure SQL Database password"),
+
+    /* ===========================
+     * AZURE SQL
+     * =========================== */
+    AZURE_SQL_SERVER: z.string(),
+    AZURE_SQL_DATABASE: z.string(),
+    AZURE_SQL_USER: z.string(),
+    AZURE_SQL_PASSWORD: z.string(),
     AZURE_SQL_PORT: z
         .string()
         .default("1433")
@@ -63,44 +73,150 @@ export const envSchema = z.object({
     AZURE_SQL_TRUST_SERVER_CERTIFICATE: z
         .string()
         .default("false")
-        .describe("Trust server certificate for Azure SQL"),
+        .transform((val) => val === "true"),
 
-    RUN_MIGRATIONS: z
+
+
+    /* ===========================
+     * EXTERNAL SERVICES
+     * =========================== */
+    DOCUMENT_BASE_URL: z.string().min(1),
+    SENDGRID_API_KEY: z.string().min(1),
+
+    /* ===========================
+     * CLAIMS TRACKER
+     * =========================== */
+    CLAIMS_TRACKER_BASE_URL: z.string(),
+    CLAIMS_TRACKER_USERNAME: z.string(),
+    CLAIMS_TRACKER_PASSWORD: z.string(),
+    CLAIMS_TRACKER_USER_ID: z.string(),
+
+
+    /* ===========================
+    * CONNECT SERVICE
+    * =========================== */
+    CONNECT_SERVICE_APP_URL: z.string(),
+    CONNECT_SERVICE_APP_API_KEY: z.string(),
+
+    /* ===========================
+     * FRAUD
+     * =========================== */
+    FRAUD_SCAN_API_KEY: z.string(),
+    FRAUD_SCAN_URL: z.string(),
+
+    LOW_FRAUD_SCORE_LIMIT: z
+        .string()
+        .transform((val) => Number(val)),
+
+    MEDIUM_FRAUD_SCORE_LIMIT: z
+        .string()
+        .transform((val) => Number(val)),
+
+    /* ===========================
+    * PIQE
+    * =========================== */
+    PIQE_ENDPOINT: z.string().min(1),
+    PIQE_EMAIL: z.string(),
+    PIQE_PASSWORD: z.string(),
+
+    /* ===========================
+     * HELIOS
+     * =========================== */
+    HELIOS_API_ENDPOINT: z.string().url(),
+    HELIOS_API_KEY: z.string(),
+
+    /* ===========================
+     * AUTH
+     * =========================== */
+    JWT_SECRET: z.string(),
+
+    NEW_AUTHENTICATION: z
         .string()
         .default("false")
-        .describe("Run database migrations on startup"),
+        .transform((val) => val === "true"),
 
-    HELIOS_API_KEY: z
+    SIC_COGNITO_USER_POOL_ID: z.string(),
+    HELIOS_WEB_COGNITO_USER_POOL_ID: z.string(),
+    VIRTUAL_INSPECTION_APP_ORIGIN: z.string(),
+
+    /* ===========================
+      * AWS (MULTI-SERVICE)
+      * =========================== */
+
+    // Bedrock
+    BEDROCK_ACCESS_KEY_ID: z.string(),
+    BEDROCK_SECRET_ACCESS_KEY: z.string(),
+    BEDROCK_REGION: z.string(),
+
+    // Rekognition
+    REKOGNITION_ACCESS_KEY_ID: z.string(),
+    REKOGNITION_SECRET_ACCESS_KEY: z.string(),
+    REKOGNITION_REGION: z.string(),
+
+    // Textract
+    TEXTRACT_ACCESS_KEY_ID: z.string(),
+    TEXTRACT_SECRET_ACCESS_KEY: z.string(),
+    TEXTRACT_REGION: z.string(),
+
+    // S3
+    S3_ACCESS_KEY_ID: z.string(),
+    S3_SECRET_ACCESS_KEY: z.string(),
+    S3_REGION: z.string(),
+    S3_BUCKET_NAME: z.string(),
+
+    /* ===========================
+     * BUSINESS RULES
+     * =========================== */
+    AUTOMATIC_OFFER_PAYMENT_THRESHOLD: z
         .string()
-        .describe("The key used to authenticate incoming requests from Helios API"),
+        .default("1000")
+        .transform((val) => parseInt(val, 10))
+        .pipe(z.number()),
 
-    // Loki Configuration
-    LOKI_ENDPOINT: z.string().optional().describe("Loki endpoint for logs"),
-    LOKI_USERNAME: z.string().optional().describe("Loki username"),
-    LOKI_PASSWORD: z.string().optional().describe("Loki password"),
+    /* ===========================
+     * OBSERVABILITY (OTEL)
+     * =========================== */
+    OTEL_SERVICE_NAME: z.string().default("cpe-api"),
+    OTEL_SERVICE_VERSION: z.string().optional(),
+    OTEL_EXPORTER_OTLP_ENDPOINT: z.string().optional(),
+    OTEL_TRACES_EXPORTER: z.string().default("otlp"),
+    OTEL_METRICS_EXPORTER: z.string().default("prometheus"),
+    OTEL_TRACES_SAMPLER: z.string().default("parentbased_traceidratio"),
+    OTEL_TRACES_SAMPLER_ARG: z.string().default("1.0"),
 
-    // CloudWatch Configuration
-    AWS_REGION: z.string().optional().describe("AWS region for CloudWatch"),
-    CLOUDWATCH_LOG_GROUP: z
-        .string()
-        .optional()
-        .describe("CloudWatch log group name"),
-    CLOUDWATCH_LOG_STREAM: z
-        .string()
-        .optional()
-        .describe("CloudWatch log stream name"),
-
+    /* ===========================
+     * LOGGING
+     * =========================== */
     LOG_LEVEL: z
         .enum(["error", "warn", "info", "http", "verbose", "debug", "silly"])
         .default("debug"),
+    LOKI_ENDPOINT: z.string().optional(),
+    LOKI_USERNAME: z.string().optional(),
+    LOKI_PASSWORD: z.string().optional(),
+    AWS_REGION: z.string().optional(),
+    CLOUDWATCH_LOG_GROUP: z.string().optional(),
+    CLOUDWATCH_LOG_STREAM: z.string().optional(),
 
-    SIC_COGNITO_USER_POOL_ID: z
-        .string()
-        .describe("The Cognito User Pool ID for the SIC application"),
-    HELIOS_WEB_COGNITO_USER_POOL_ID: z
-        .string()
-        .describe("The Cognito User Pool ID for the Helios web application"),
 
+    /* ===========================
+     * PROMETHEUS
+     * =========================== */
+    PROMETHEUS_PORT: z
+        .string()
+        .default("9090")
+        .transform((val) => parseInt(val, 10))
+        .pipe(z.number()),
+
+    PROMETHEUS_PATH: z.string().default("/metrics"),
+
+    /* ===========================
+    * CACHE
+    * =========================== */
+    CATALOGS_CACHE_REFRESH_INTERVAL_MS: z
+        .string()
+        .optional()
+        .default("3600000")
+        .transform((val) => parseInt(val, 10)),
 
 });
 
