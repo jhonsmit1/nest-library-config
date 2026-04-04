@@ -1,16 +1,14 @@
-import { ConfigService } from "@nestjs/config";
 import { AppConfigModuleOptions } from "./app-config.interfaces";
 import { EnvConfig } from "../env.schema";
 export declare class AppConfigService {
-    private readonly configService;
     private readonly options;
     private readonly validatedConfig?;
     private readonly cache;
     private readonly logger;
-    constructor(configService: ConfigService, options: AppConfigModuleOptions);
+    constructor(options: AppConfigModuleOptions);
     private validateEnvironment;
     private resolveValue;
-    get<K extends keyof EnvConfig>(key: K): EnvConfig[K] | undefined;
+    get<K extends keyof EnvConfig>(key: K): EnvConfig[K];
     getOrThrow<K extends keyof EnvConfig>(key: K): EnvConfig[K];
     get env(): "development" | "test" | "production";
     get port(): number;
@@ -47,4 +45,19 @@ export declare class AppConfigService {
     get heliosWebCognitoUserPoolId(): string;
     get jwtSecret(): string;
     get heliosApiKey(): string;
+    get otelServiceName(): string;
+    get otelServiceVersion(): string;
+    get otelExporterOtlpEndpoint(): string | undefined;
+    get otelTracesExporter(): string;
+    get otelMetricsExporter(): string;
+    get otelTracesSampler(): string;
+    get otelTracesSamplerArg(): number;
+    get prometheusPort(): number;
+    get prometheusPath(): string;
+    get observabilityConfig(): {
+        serviceName: string;
+        serviceVersion: string;
+        prometheusPort: number;
+        otlpEndpoint: string | undefined;
+    };
 }

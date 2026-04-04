@@ -104,7 +104,7 @@ exports.envSchema = zod_1.z.object({
         .transform((val) => parseInt(val, 10))
         .pipe(zod_1.z.number()),
     OTEL_SERVICE_NAME: zod_1.z.string().default("cpe-api"),
-    OTEL_SERVICE_VERSION: zod_1.z.string().optional(),
+    OTEL_SERVICE_VERSION: zod_1.z.string().default("1.0.0"),
     OTEL_EXPORTER_OTLP_ENDPOINT: zod_1.z.string().optional(),
     OTEL_TRACES_EXPORTER: zod_1.z.string().default("otlp"),
     OTEL_METRICS_EXPORTER: zod_1.z.string().default("prometheus"),
@@ -121,7 +121,7 @@ exports.envSchema = zod_1.z.object({
     CLOUDWATCH_LOG_STREAM: zod_1.z.string().optional(),
     PROMETHEUS_PORT: zod_1.z
         .string()
-        .default("9090")
+        .default("9464")
         .transform((val) => parseInt(val, 10))
         .pipe(zod_1.z.number()),
     PROMETHEUS_PATH: zod_1.z.string().default("/metrics"),

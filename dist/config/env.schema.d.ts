@@ -60,7 +60,7 @@ export declare const envSchema: z.ZodObject<{
     S3_BUCKET_NAME: z.ZodString;
     AUTOMATIC_OFFER_PAYMENT_THRESHOLD: z.ZodPipeline<z.ZodEffects<z.ZodDefault<z.ZodString>, number, string | undefined>, z.ZodNumber>;
     OTEL_SERVICE_NAME: z.ZodDefault<z.ZodString>;
-    OTEL_SERVICE_VERSION: z.ZodOptional<z.ZodString>;
+    OTEL_SERVICE_VERSION: z.ZodDefault<z.ZodString>;
     OTEL_EXPORTER_OTLP_ENDPOINT: z.ZodOptional<z.ZodString>;
     OTEL_TRACES_EXPORTER: z.ZodDefault<z.ZodString>;
     OTEL_METRICS_EXPORTER: z.ZodDefault<z.ZodString>;
@@ -137,6 +137,7 @@ export declare const envSchema: z.ZodObject<{
     S3_BUCKET_NAME: string;
     AUTOMATIC_OFFER_PAYMENT_THRESHOLD: number;
     OTEL_SERVICE_NAME: string;
+    OTEL_SERVICE_VERSION: string;
     OTEL_TRACES_EXPORTER: string;
     OTEL_METRICS_EXPORTER: string;
     OTEL_TRACES_SAMPLER: string;
@@ -145,7 +146,6 @@ export declare const envSchema: z.ZodObject<{
     PROMETHEUS_PORT: number;
     PROMETHEUS_PATH: string;
     CATALOGS_CACHE_REFRESH_INTERVAL_MS: number;
-    OTEL_SERVICE_VERSION?: string | undefined;
     OTEL_EXPORTER_OTLP_ENDPOINT?: string | undefined;
     LOKI_ENDPOINT?: string | undefined;
     LOKI_USERNAME?: string | undefined;

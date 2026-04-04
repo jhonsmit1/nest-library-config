@@ -177,7 +177,7 @@ export const envSchema = z.object({
      * OBSERVABILITY (OTEL)
      * =========================== */
     OTEL_SERVICE_NAME: z.string().default("cpe-api"),
-    OTEL_SERVICE_VERSION: z.string().optional(),
+    OTEL_SERVICE_VERSION: z.string().default("1.0.0"),
     OTEL_EXPORTER_OTLP_ENDPOINT: z.string().optional(),
     OTEL_TRACES_EXPORTER: z.string().default("otlp"),
     OTEL_METRICS_EXPORTER: z.string().default("prometheus"),
@@ -203,7 +203,7 @@ export const envSchema = z.object({
      * =========================== */
     PROMETHEUS_PORT: z
         .string()
-        .default("9090")
+        .default("9464")
         .transform((val) => parseInt(val, 10))
         .pipe(z.number()),
 

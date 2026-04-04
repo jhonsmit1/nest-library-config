@@ -1,5 +1,4 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import { ZodType } from "zod";
 import { APP_CONFIG_OPTIONS } from "./app-config.constants";
 import { AppConfigModuleOptions } from "./app-config.interfaces";
@@ -14,7 +13,6 @@ export class AppConfigService {
     private readonly logger = new Logger(AppConfigService.name);
 
     constructor(
-        private readonly configService: ConfigService,
         @Inject(APP_CONFIG_OPTIONS)
         private readonly options: AppConfigModuleOptions,
 
@@ -25,7 +23,8 @@ export class AppConfigService {
     }
 
     private validateEnvironment(schema: ZodType<EnvConfig>): EnvConfig {
-        const result = schema.safeParse(process.env);
+        const env = process.env;
+        const result = schema.safeParse(env);
         if (!result.success) {
             this.logger.error("Invalid environment configuration", result.error.format());
             throw new Error("Invalid environment configuration");
@@ -34,17 +33,15 @@ export class AppConfigService {
         return result.data;
     }
 
-    private resolveValue<K extends keyof EnvConfig>(
-        key: K
-    ): EnvConfig[K] | undefined {
-        if (this.validatedConfig) {
-            return this.validatedConfig[key];
+    private resolveValue<K extends keyof EnvConfig>(key: K): EnvConfig[K] {
+        if (!this.validatedConfig) {
+            throw new Error("Config not initialized");
         }
 
-        return this.configService.get<EnvConfig[K]>(key);
+        return this.validatedConfig[key];
     }
 
-    get<K extends keyof EnvConfig>(key: K): EnvConfig[K] | undefined {
+    get<K extends keyof EnvConfig>(key: K): EnvConfig[K] {
         if (this.options.cache && this.cache.has(key)) {
             return this.cache.get(key) as EnvConfig[K];
         }
@@ -237,6 +234,59 @@ export class AppConfigService {
 
     get heliosApiKey() {
         return this.getOrThrow("HELIOS_API_KEY");
+    }
+
+    /* ===========================
+   OBSERVABILITY (OTEL)
+   =========================== */
+
+    get otelServiceName() {
+        return this.get("OTEL_SERVICE_NAME");
+    }
+
+    get otelServiceVersion() {
+        return this.get("OTEL_SERVICE_VERSION");
+    }
+
+    get otelExporterOtlpEndpoint() {
+        return this.get("OTEL_EXPORTER_OTLP_ENDPOINT");
+    }
+
+    get otelTracesExporter() {
+        return this.get("OTEL_TRACES_EXPORTER");
+    }
+
+    get otelMetricsExporter() {
+        return this.get("OTEL_METRICS_EXPORTER");
+    }
+
+    get otelTracesSampler() {
+        return this.get("OTEL_TRACES_SAMPLER");
+    }
+
+    get otelTracesSamplerArg() {
+        return Number(this.get("OTEL_TRACES_SAMPLER_ARG"));
+    }
+
+    /* ===========================
+       PROMETHEUS
+       =========================== */
+
+    get prometheusPort() {
+        return this.get("PROMETHEUS_PORT");
+    }
+
+    get prometheusPath() {
+        return this.get("PROMETHEUS_PATH");
+    }
+
+    get observabilityConfig() {
+        return {
+            serviceName: this.otelServiceName,
+            serviceVersion: this.otelServiceVersion,
+            prometheusPort: this.prometheusPort,
+            otlpEndpoint: this.otelExporterOtlpEndpoint,
+        };
     }
 
 }

@@ -15,24 +15,22 @@ var AppConfigService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppConfigService = void 0;
 const common_1 = require("@nestjs/common");
-const config_1 = require("@nestjs/config");
 const app_config_constants_1 = require("./app-config.constants");
 const common_2 = require("@nestjs/common");
 let AppConfigService = AppConfigService_1 = class AppConfigService {
-    configService;
     options;
     validatedConfig;
     cache = new Map();
     logger = new common_2.Logger(AppConfigService_1.name);
-    constructor(configService, options) {
-        this.configService = configService;
+    constructor(options) {
         this.options = options;
         if (this.options.schema) {
             this.validatedConfig = this.validateEnvironment(this.options.schema);
         }
     }
     validateEnvironment(schema) {
-        const result = schema.safeParse(process.env);
+        const env = process.env;
+        const result = schema.safeParse(env);
         if (!result.success) {
             this.logger.error("Invalid environment configuration", result.error.format());
             throw new Error("Invalid environment configuration");
@@ -40,10 +38,10 @@ let AppConfigService = AppConfigService_1 = class AppConfigService {
         return result.data;
     }
     resolveValue(key) {
-        if (this.validatedConfig) {
-            return this.validatedConfig[key];
+        if (!this.validatedConfig) {
+            throw new Error("Config not initialized");
         }
-        return this.configService.get(key);
+        return this.validatedConfig[key];
     }
     get(key) {
         if (this.options.cache && this.cache.has(key)) {
@@ -168,10 +166,45 @@ let AppConfigService = AppConfigService_1 = class AppConfigService {
     get heliosApiKey() {
         return this.getOrThrow("HELIOS_API_KEY");
     }
+    get otelServiceName() {
+        return this.get("OTEL_SERVICE_NAME");
+    }
+    get otelServiceVersion() {
+        return this.get("OTEL_SERVICE_VERSION");
+    }
+    get otelExporterOtlpEndpoint() {
+        return this.get("OTEL_EXPORTER_OTLP_ENDPOINT");
+    }
+    get otelTracesExporter() {
+        return this.get("OTEL_TRACES_EXPORTER");
+    }
+    get otelMetricsExporter() {
+        return this.get("OTEL_METRICS_EXPORTER");
+    }
+    get otelTracesSampler() {
+        return this.get("OTEL_TRACES_SAMPLER");
+    }
+    get otelTracesSamplerArg() {
+        return Number(this.get("OTEL_TRACES_SAMPLER_ARG"));
+    }
+    get prometheusPort() {
+        return this.get("PROMETHEUS_PORT");
+    }
+    get prometheusPath() {
+        return this.get("PROMETHEUS_PATH");
+    }
+    get observabilityConfig() {
+        return {
+            serviceName: this.otelServiceName,
+            serviceVersion: this.otelServiceVersion,
+            prometheusPort: this.prometheusPort,
+            otlpEndpoint: this.otelExporterOtlpEndpoint,
+        };
+    }
 };
 exports.AppConfigService = AppConfigService;
 exports.AppConfigService = AppConfigService = AppConfigService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __param(1, (0, common_1.Inject)(app_config_constants_1.APP_CONFIG_OPTIONS)),
-    __metadata("design:paramtypes", [config_1.ConfigService, Object])
+    __param(0, (0, common_1.Inject)(app_config_constants_1.APP_CONFIG_OPTIONS)),
+    __metadata("design:paramtypes", [Object])
 ], AppConfigService);
